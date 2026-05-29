@@ -1,0 +1,74 @@
+const prisma = require('../config/db');
+
+const listarProductos = async (req, res) => {
+  try {
+    const { categoria, busqueda } = req.query;
+    const filtro = { where: { disponible: true } };
+
+    if (categoria) filtro.where.categoria_id = parseInt(categoria);
+    if (busqueda) filtro.where.nombre = { contains: busqueda, mode: 'insensitive' };
+
+    const productos = await prisma.producto.findMany({ ...filtro, include: { categoria: true } });
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const obtenerProducto = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const idProducto = parseInt(id);
+    if (isNaN(idProducto)) return res.status(400).json({ error: "ID inválido." });
+    const producto = await prisma.producto.findUnique({ where: { id: idProducto }, include: { categoria: true } });
+    if (!producto) return res.status(404).json({ error: "Producto no encontrado." });
+    res.json(producto);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const crearProducto = async (req, res) => {
+  const { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible } = req.body;
+  if (!nombre || !precio_base || !categoria_id) return res.status(400).json({ error: "'nombre', 'precio_base' y 'categoria_id' son requeridos." });
+  try {
+    const producto = await prisma.producto.create({
+      data: { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible }
+    });
+    res.status(201).json(producto);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const actualizarProducto = async (req, res) => {
+  const { id } = req.params;
+  const { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible } = req.body;
+  try {
+    const idProducto = parseInt(id);
+    if (isNaN(idProducto)) return res.status(400).json({ error: "ID inválido." });
+    const producto = await prisma.producto.update({
+      where: { id: idProducto },
+      data: { ...(nombre && { nombre }), ...(descripcion !== undefined && { descripcion }), ...(precio_base && { precio_base }), ...(categoria_id && { categoria_id }), ...(imagen_url !== undefined && { imagen_url }), ...(disponible !== undefined && { disponible }) }
+    });
+    res.json(producto);
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: "Producto no encontrado." });
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const eliminarProducto = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const idProducto = parseInt(id);
+    if (isNaN(idProducto)) return res.status(400).json({ error: "ID inválido." });
+    await prisma.producto.delete({ where: { id: idProducto } });
+    res.json({ message: "Producto eliminado." });
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: "Producto no encontrado." });
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { listarProductos, obtenerProducto, crearProducto, actualizarProducto, eliminarProducto };

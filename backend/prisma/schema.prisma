@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// 1. USUARIOS Y ACCESOS
+// ==========================================
+model Rol {
+  id       Int       @id @default(autoincrement())
+  nombre   String    @unique
+  usuarios Usuario[]
+}
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  rol_id        Int
+  rol           Rol      @relation(fields: [rol_id], references: [id])
+  sesiones_chat SesionChat[]
+
+  // Relaciones con perfiles
+  empleado Empleado?
+  cliente  Cliente?
+}
+
+model Empleado {
+  id          Int          @id @default(autoincrement())
+  usuario_id  Int          @unique
+  nombre      String
+  cargo       String
+  usuario     Usuario      @relation(fields: [usuario_id], references: [id])
+  asistencias Asistencia[]
+}
+
+model Cliente {
+  id         Int       @id @default(autoincrement())
+  usuario_id Int?      @unique
+  nombre     String
+  telefono   String?   @unique
+  usuario    Usuario?  @relation(fields: [usuario_id], references: [id])
+  pedidos    Pedido[]
+  sesiones  SesionChat[]
+}
+
+model Asistencia {
+  id           Int       @id @default(autoincrement())
+  empleado_id  Int
+  hora_entrada DateTime  @default(now())
+  hora_salida  DateTime?
+  empleado     Empleado  @relation(fields: [empleado_id], references: [id])
+}
+
+// ==========================================
+// 2. CATÁLOGO Y PRODUCTOS
+// ==========================================
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  activa    Boolean    @default(true)
+  productos Producto[]
+}
+
+model Producto {
+  id                Int      @id @default(autoincrement())
+  categoria_id      Int
+  nombre            String
+  descripcion       String?
+  precio_base       Float
+  es_personalizable Boolean  @default(false)
+  imagen_url        String?
+  disponible        Boolean  @default(true)
+
+  categoria       Categoria          @relation(fields: [categoria_id], references: [id])
+  variantes       VarianteProducto[]
+  recetas         Receta[]
+  detalles_pedido DetallePedido[]
+}
+
+model VarianteProducto {
+  id               Int    @id @default(autoincrement())
+  producto_id      Int
+  tamano           String
+  sabor_bizcocho   String
+  precio_adicional Float  @default(0.0)
+
+  producto        Producto        @relation(fields: [producto_id], references: [id])
+  detalles_pedido DetallePedido[]
+}
+
+// ==========================================
+// 3. INVENTARIO Y PRODUCCIÓN
+// ==========================================
+model Ingrediente {
+  id               Int    @id @default(autoincrement())
+  nombre           String
+  unidad_medida    String
+  costo_por_unidad Float
+  stock_actual     Float
+  stock_minimo     Float
+
+  recetas Receta[]
+}
+
+model Receta {
+  id                 Int   @id @default(autoincrement())
+  producto_id        Int
+  ingrediente_id     Int
+  cantidad_necesaria Float
+
+  producto    Producto    @relation(fields: [producto_id], references: [id])
+  ingrediente Ingrediente @relation(fields: [ingrediente_id], references: [id])
+}
+
+// ==========================================
+// 4. PEDIDOS Y VENTAS
+// ==========================================
+model Pedido {
+  id         Int      @id @default(autoincrement())
+  cliente_id Int?
+  estado     String   @default("pendiente")
+  total      Float
+
+  cliente  Cliente?        @relation(fields: [cliente_id], references: [id])
+  detalles DetallePedido[]
+  pagos    Pago[]
+}
+
+model DetallePedido {
+  id                    Int     @id @default(autoincrement())
+  pedido_id             Int
+  producto_id           Int
+  variante_id           Int?
+  cantidad              Int
+  subtotal              Float
+  notas_personalizacion String?
+
+  pedido   Pedido            @relation(fields: [pedido_id], references: [id])
+  producto Producto          @relation(fields: [producto_id], references: [id])
+  variante VarianteProducto? @relation(fields: [variante_id], references: [id])
+}
+
+model Pago {
+  id          Int      @id @default(autoincrement())
+  pedido_id   Int
+  monto       Float
+  metodo_pago String
+  estado_pago String   @default("completado")
+  fecha_pago  DateTime @default(now())
+
+  pedido Pedido @relation(fields: [pedido_id], references: [id])
+}
+
+// ==========================================
+// 5. CHATBOT CON OPENAI
+// ==========================================
+model SesionChat {
+  id                Int      @id @default(autoincrement())
+  usuario_id        Int?
+  telefono_whatsapp String?
+  estado_sesion     String   @default("activa")
+  creado_en         DateTime @default(now())
+
+  cliente_id        Int?
+  cliente           Cliente?      @relation(fields: [cliente_id], references: [id])
+
+  usuario  Usuario?      @relation(fields: [usuario_id], references: [id])
+  mensajes MensajeChat[]
+}
+
+model MensajeChat {
+  id                Int      @id @default(autoincrement())
+  sesion_id         Int
+  emisor            String
+  contenido_mensaje String
+  tokens_consumidos Int?
+  fecha_hora        DateTime @default(now())
+
+  sesion SesionChat @relation(fields: [sesion_id], references: [id])
+}
