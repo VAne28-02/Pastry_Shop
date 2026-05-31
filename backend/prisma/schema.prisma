@@ -159,7 +159,20 @@ model Pago {
 }
 
 // ==========================================
-// 5. CHATBOT CON OPENAI
+// 5. PROMOCIONES
+// ==========================================
+model Promo {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  descripcion String
+  precio      Float    @default(0)
+  icono       String   @default("🎉")
+  activa      Boolean  @default(true)
+  creado_en   DateTime @default(now())
+}
+
+// ==========================================
+// 6. CHATBOT CON OPENAI
 // ==========================================
 model SesionChat {
   id                Int      @id @default(autoincrement())
