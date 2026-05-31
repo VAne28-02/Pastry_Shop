@@ -18,6 +18,7 @@ const tabsPorRol = {
     { id: 'inventario', label: 'Inventario', icon: '📦' },
     { id: 'stock', label: 'Stock', icon: '🏷️' },
     { id: 'asistencia', label: 'Asistencia', icon: '⏱️' },
+    { id: 'promos', label: 'Promos', icon: '🎉' },
     { id: 'chat', label: 'Chat', icon: '💬' },
   ],
   Empleado: [
@@ -85,7 +86,7 @@ export default function Dashboard({ session, onLogout }) {
       <main className="flex-1 overflow-auto relative">
         {tab === 'pedidos' && <PedidosView token={session.token} />}
         {tab === 'productos' && <ProductosView token={session.token} session={session} />}
-        {tab === 'promos' && <PromosView />}
+        {tab === 'promos' && <PromosView session={session} token={session.token} />}
         {tab === 'asistencia' && <AsistenciaView token={session.token} session={session} />}
         {tab === 'pagos' && <PagosView token={session.token} />}
         {tab === 'ganancia' && <GananciaView token={session.token} />}

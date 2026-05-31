@@ -43,7 +43,7 @@ async function main() {
 
   // Categorías y productos de ejemplo
   const categoriasData = [
-    { nombre: 'Tortas', productos: [
+    { nombre: 'Sandwiches', productos: [
       { nombre: 'Torta de Chocolate', descripcion: 'Torta húmeda de chocolate con cobertura de ganache', precio_base: 45.00, imagen_url: '/img/torta-chocolate.jpg' },
       { nombre: 'Torta de Fresa', descripcion: 'Torta de vainilla con fresas frescas y crema', precio_base: 48.00, imagen_url: '/img/torta-fresa.jpg' },
       { nombre: 'Torta Tres Leches', descripcion: 'Torta esponjosa bañada en tres leches', precio_base: 52.00, imagen_url: '/img/torta-tres-leches.jpg' }
