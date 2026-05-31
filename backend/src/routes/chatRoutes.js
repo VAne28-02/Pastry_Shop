@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 // Importamos las funciones desde el controlador
-const { enviarMensaje, obtenerPedidos, actualizarEstadoPedido, obtenerPedidoPorId } = require('../controllers/chatController');
+const { enviarMensaje, obtenerPedidos, actualizarEstadoPedido, obtenerPedidoPorId, obtenerHistorial } = require('../controllers/chatController');
 
 // Ruta para enviar mensajes (POST)
 // Nota: Ahora llamarás a esta ruta usando: /api/chat/enviar
@@ -12,6 +12,7 @@ router.post('/enviar', enviarMensaje);
 router.get('/pedidos', obtenerPedidos);
 
 
+router.get('/historial', obtenerHistorial);
 router.put('/pedido/:id/estado', actualizarEstadoPedido);
 router.get('/pedido/:id', obtenerPedidoPorId);
 

@@ -73,6 +73,12 @@ async function main() {
     }
   }
 
+  // Asignar stock inicial a los productos
+  const todosProductos = await prisma.producto.findMany();
+  for (const prod of todosProductos) {
+    await prisma.producto.update({ where: { id: prod.id }, data: { stock: Math.floor(Math.random() * 20) + 10 } });
+  }
+
   console.log('✅ Base de datos lista.');
 }
 

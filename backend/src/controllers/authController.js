@@ -3,8 +3,9 @@ const prisma = require('../config/db'); // Importación única y correcta
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const registrarCliente = async (req, res) => {
-  const { email, password, nombre, telefono } = req.body;
+const registrar = async (req, res) => {
+  const { email, password, nombre, telefono, cargo, rol } = req.body;
+  const tipoRol = rol === 'empleado' ? 'Empleado' : 'Cliente';
   try {
     const existe = await prisma.usuario.findUnique({ where: { email } });
     if (existe) return res.status(409).json({ message: "El email ya está registrado" });
@@ -18,12 +19,18 @@ const registrarCliente = async (req, res) => {
           password_hash,
           rol: {
             connectOrCreate: {
-              where: { nombre: 'Cliente' },
-              create: { nombre: 'Cliente' }
+              where: { nombre: tipoRol },
+              create: { nombre: tipoRol }
             }
           }
         }
       });
+      if (tipoRol === 'Empleado') {
+        const empleado = await tx.empleado.create({
+          data: { usuario_id: usuario.id, nombre, cargo: cargo || 'Empleado' }
+        });
+        return { usuario, empleado };
+      }
       const cliente = telefono
         ? await tx.cliente.upsert({
             where: { telefono },
@@ -35,7 +42,7 @@ const registrarCliente = async (req, res) => {
           });
       return { usuario, cliente };
     });
-    res.status(201).json({ message: "Cliente registrado", usuario: resultado.usuario });
+    res.status(201).json({ message: `${tipoRol} registrado`, usuario: resultado.usuario });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -46,17 +53,17 @@ const login = async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { email },
-      include: { empleado: true, cliente: true }
+      include: { empleado: true, cliente: true, rol: true }
     });
     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
     const passwordValido = await bcrypt.compare(password, usuario.password_hash);
     if (!passwordValido) return res.status(401).json({ message: "Contraseña incorrecta" });
     const token = jwt.sign({ id: usuario.id, rol_id: usuario.rol_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
     const perfil = usuario.empleado || usuario.cliente || { nombre: "Usuario" };
-    res.json({ token, perfil, rol: usuario.rol_id });
+    res.json({ token, perfil, rol: usuario.rol_id, rol_nombre: usuario.rol.nombre });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = { registrarCliente, login };
+module.exports = { registrar, login };
