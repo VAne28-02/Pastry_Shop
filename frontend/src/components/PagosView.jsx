@@ -42,7 +42,7 @@ export default function PagosView({ token }) {
             {pagos.map(p => (
               <tr key={p.id} className="border-b border-neutral-50 hover:bg-neutral-50/50">
                 <td className="py-3 px-4 text-neutral-600">#{p.id}</td>
-                <td className="py-3 px-4 font-medium text-neutral-800">${p.monto.toFixed(2)}</td>
+                <td className="py-3 px-4 font-medium text-neutral-800">S/.{p.monto.toFixed(2)}</td>
                 <td className="py-3 px-4 capitalize text-neutral-600">{p.metodo_pago}</td>
                 <td className="py-3 px-4">
                   <span className={`px-2 py-0.5 rounded-full text-xs ${

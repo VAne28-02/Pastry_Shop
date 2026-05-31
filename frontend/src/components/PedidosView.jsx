@@ -158,7 +158,7 @@ export default function PedidosView({ token }) {
                 </div>
               </div>
 
-              <p className="text-2xl font-light text-neutral-900 mb-4">${p.total}</p>
+              <p className="text-2xl font-light text-neutral-900 mb-4">S/.{p.total}</p>
 
               <div className="flex gap-2">
                 <button
@@ -204,14 +204,14 @@ export default function PedidosView({ token }) {
               {detalle.detalles?.map(d => (
                 <div key={d.id} className="flex items-center justify-between text-sm">
                   <span className="text-neutral-700">{d.cantidad}x {d.producto?.nombre || 'Producto'}</span>
-                  <span className="text-neutral-500">${d.subtotal}</span>
+                  <span className="text-neutral-500">S/.{d.subtotal}</span>
                 </div>
               ))}
             </div>
 
             <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-between text-sm font-medium">
               <span className="text-neutral-500">Total</span>
-              <span className="text-neutral-900">${detalle.total}</span>
+              <span className="text-neutral-900">S/.{detalle.total}</span>
             </div>
 
             {/* Pagos */}
@@ -222,7 +222,7 @@ export default function PedidosView({ token }) {
                   <div key={p.id} className="flex items-center justify-between text-sm">
                     <span className="text-neutral-600 capitalize">{p.metodo_pago}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-neutral-500">${p.monto.toFixed(2)}</span>
+                      <span className="text-neutral-500">S/.{p.monto.toFixed(2)}</span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] ${p.estado_pago === 'completado' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'}`}>
                         {p.estado_pago}
                       </span>

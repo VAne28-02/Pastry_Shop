@@ -131,13 +131,17 @@ export default function ProductosView({ token, session }) {
                 </div>
               )}
               <button onClick={() => abrirFormulario(p)} className="text-left w-full">
-                <div className="w-full h-24 bg-neutral-50 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-3xl opacity-30">🧁</span>
+                <div className="w-full h-24 bg-neutral-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                  {p.imagen_url ? (
+                    <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    <span className="text-3xl opacity-30">🧁</span>
+                  )}
                 </div>
                 <h3 className="font-medium text-sm text-neutral-900">{p.nombre}</h3>
                 {p.descripcion && <p className="text-xs text-neutral-400 mt-1 line-clamp-2">{p.descripcion}</p>}
                 <div className="flex items-center justify-between mt-3">
-                  <span className="text-lg font-light text-neutral-900">${p.precio_base}</span>
+                  <span className="text-lg font-light text-neutral-900">S/.{p.precio_base}</span>
                   {p.categoria && (
                     <span className="text-[10px] text-neutral-400 bg-neutral-50 px-2 py-0.5 rounded-full">{p.categoria.nombre}</span>
                   )}
@@ -157,8 +161,11 @@ export default function ProductosView({ token, session }) {
               {!enviando && <button onClick={() => setModal(null)} className="text-neutral-300 hover:text-neutral-500 text-lg leading-none">&times;</button>}
             </div>
             <div className="bg-neutral-50 rounded-lg p-3 mb-5">
+              {modal.imagen_url && (
+                <img src={modal.imagen_url} alt={modal.nombre} className="w-full h-24 object-cover rounded-lg mb-3" />
+              )}
               <p className="font-medium text-sm text-neutral-900">{modal.nombre}</p>
-              <p className="text-xs text-neutral-400 mt-0.5">${modal.precio_base} c/u</p>
+              <p className="text-xs text-neutral-400 mt-0.5">S/.{modal.precio_base} c/u</p>
             </div>
             <div className="space-y-3">
               <div>
@@ -198,7 +205,7 @@ export default function ProductosView({ token, session }) {
             {mensaje && <p className="text-sm text-center mt-4">{mensaje}</p>}
             <button onClick={enviarPedido} disabled={enviando || !nombre.trim()}
               className="w-full mt-5 py-3 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:opacity-50 transition-colors">
-              {enviando ? 'Registrando...' : `Registrar pedido — $${(modal.precio_base * cantidad).toFixed(2)}`}
+              {enviando ? 'Registrando...' : `Registrar pedido — S/.${(modal.precio_base * cantidad).toFixed(2)}`}
             </button>
           </div>
         </div>
