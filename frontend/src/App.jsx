@@ -9,7 +9,7 @@ function App() {
   });
 
   const handleLogin = (data) => {
-    const s = { email: data.perfil?.nombre || 'Admin', token: data.token };
+    const s = { email: data.perfil?.nombre || 'Admin', token: data.token, rol: data.rol, rol_nombre: data.rol_nombre, perfil: data.perfil };
     localStorage.setItem('session', JSON.stringify(s));
     setSession(s);
   };
