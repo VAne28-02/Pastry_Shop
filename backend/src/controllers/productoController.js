@@ -58,6 +58,24 @@ const actualizarProducto = async (req, res) => {
   }
 };
 
+const actualizarStockProducto = async (req, res) => {
+  const { id } = req.params;
+  const { stock } = req.body;
+  if (stock === undefined) return res.status(400).json({ error: "'stock' es requerido." });
+  try {
+    const idProd = parseInt(id);
+    if (isNaN(idProd)) return res.status(400).json({ error: "ID inválido." });
+    const producto = await prisma.producto.update({
+      where: { id: idProd },
+      data: { stock: Math.max(0, stock) }
+    });
+    res.json(producto);
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ error: "Producto no encontrado." });
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const eliminarProducto = async (req, res) => {
   const { id } = req.params;
   try {
@@ -71,4 +89,4 @@ const eliminarProducto = async (req, res) => {
   }
 };
 
-module.exports = { listarProductos, obtenerProducto, crearProducto, actualizarProducto, eliminarProducto };
+module.exports = { listarProductos, obtenerProducto, crearProducto, actualizarProducto, actualizarStockProducto, eliminarProducto };
