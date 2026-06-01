@@ -2,16 +2,11 @@ import { useState, useEffect } from 'react';
 import ChatButton from './ChatButton';
 
 const fondos = ['bg-rose-50', 'bg-amber-50', 'bg-sky-50', 'bg-green-50'];
-const promos = [
-  { id: 1, titulo: '2x1 en Tortas', descripcion: 'Todos los martes y jueves. Lleva 2 tortas y paga 1.', icono: '🍰', precio: 25 },
-  { id: 2, titulo: 'Café + Pastel', descripcion: 'Combina cualquier café con un pastel y ahorra $5.', icono: '☕', precio: 12 },
-  { id: 3, titulo: 'Happy Hour', descripcion: 'De 5 a 7pm, 20% de descuento en todas las bebidas.', icono: '🥤', precio: 8 },
-  { id: 4, titulo: 'Pedidos por WhatsApp', descripcion: 'Haz tu pedido por chat y obtén un postre de cortesía.', icono: '💬', precio: 0 },
-];
 
 export default function PublicView({ onOpenLogin }) {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [promos, setPromos] = useState([]);
   const [filtroCat, setFiltroCat] = useState('');
   const [modal, setModal] = useState(null);
   const [cantidad, setCantidad] = useState(1);
@@ -24,6 +19,7 @@ export default function PublicView({ onOpenLogin }) {
   useEffect(() => {
     fetch('http://localhost:3000/api/productos').then(r => r.json()).then(d => { if (Array.isArray(d)) setProductos(d); });
     fetch('http://localhost:3000/api/categorias').then(r => r.json()).then(d => { if (Array.isArray(d)) setCategorias(d); });
+    fetch('http://localhost:3000/api/promos').then(r => r.json()).then(d => { if (d.success) setPromos(d.data); });
   }, []);
 
   const filtrados = filtroCat ? productos.filter(p => p.categoria_id === parseInt(filtroCat)) : productos;
@@ -74,11 +70,17 @@ export default function PublicView({ onOpenLogin }) {
         <h2 className="text-lg font-medium text-neutral-900 mb-6">Promociones</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {promos.map((p, i) => (
-            <div key={p.id} className={`rounded-xl ${fondos[i]} p-5`}>
-              <span className="text-2xl block mb-3">{p.icono}</span>
-              <h3 className="font-medium text-sm text-neutral-900 mb-1">{p.titulo}</h3>
-              <p className="text-xs text-neutral-500 mb-2">{p.descripcion}</p>
-              <span className="text-xs font-medium text-neutral-700">S/.{p.precio}</span>
+            <div key={p.id} className={`rounded-xl ${p.imagen_url ? 'p-0 overflow-hidden' : fondos[i % fondos.length] + ' p-5'}`}>
+              {p.imagen_url ? (
+                <img src={p.imagen_url} alt={p.titulo} className="w-full h-32 object-cover rounded-xl" />
+              ) : (
+                <span className="text-2xl block mb-3">{p.icono}</span>
+              )}
+              <div className={p.imagen_url ? 'p-4' : ''}>
+                <h3 className="font-medium text-sm text-neutral-900 mb-1">{p.titulo}</h3>
+                <p className="text-xs text-neutral-500 mb-2">{p.descripcion}</p>
+                <span className="text-xs font-medium text-neutral-700">S/.{p.precio}</span>
+              </div>
             </div>
           ))}
         </div>

@@ -112,8 +112,12 @@ export default function PromosView({ session, token }) {
                     className="text-xs w-7 h-7 bg-neutral-100 text-neutral-500 rounded hover:bg-neutral-200 flex items-center justify-center">✕</button>
                 </div>
               )}
-              <div className={`w-full h-24 ${fondos[i % fondos.length]} rounded-lg mb-4 flex items-center justify-center`}>
-                <span className="text-3xl opacity-50">{p.icono || '🎉'}</span>
+              <div className={`w-full h-24 ${p.imagen_url ? '' : fondos[i % fondos.length]} rounded-lg mb-4 flex items-center justify-center overflow-hidden`}>
+                {p.imagen_url ? (
+                  <img src={p.imagen_url} alt={p.titulo} className="w-full h-full object-cover rounded-lg" />
+                ) : (
+                  <span className="text-3xl opacity-50">{p.icono || '🎉'}</span>
+                )}
               </div>
               <h3 className="font-medium text-sm text-neutral-900">{p.titulo}</h3>
               <p className="text-xs text-neutral-400 mt-1 line-clamp-2">{p.descripcion}</p>
@@ -151,6 +155,11 @@ export default function PromosView({ session, token }) {
                   className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
               </div>
               <div>
+                <label className="block text-xs text-neutral-500 mb-1">URL imagen (opcional)</label>
+                <input value={form.imagen_url} onChange={e => setForm({...form, imagen_url: e.target.value })}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+              </div>
+              <div>
                 <label className="block text-xs text-neutral-500 mb-1">Icono (emoji)</label>
                 <input value={form.icono} onChange={e => setForm({...form, icono: e.target.value })}
                   className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
@@ -183,6 +192,11 @@ export default function PromosView({ session, token }) {
               <div>
                 <label className="block text-xs text-neutral-500 mb-1">Precio</label>
                 <input type="number" step="0.01" value={editPromo.precio} onChange={e => setEditPromo({...editPromo, precio: e.target.value })}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+              </div>
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1">URL imagen (opcional)</label>
+                <input value={editPromo.imagen_url || ''} onChange={e => setEditPromo({...editPromo, imagen_url: e.target.value })}
                   className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
               </div>
               <div>
