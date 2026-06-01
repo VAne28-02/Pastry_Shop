@@ -10,10 +10,10 @@ const listarPromos = async (req, res) => {
 };
 
 const crearPromo = async (req, res) => {
-  const { titulo, descripcion, precio, icono } = req.body;
+  const { titulo, descripcion, precio, icono, imagen_url } = req.body;
   if (!titulo || !descripcion) return res.status(400).json({ error: "'titulo' y 'descripcion' son requeridos." });
   try {
-    const data = { titulo, descripcion, precio: parseFloat(precio) || 0, icono: icono || '🎉' };
+    const data = { titulo, descripcion, precio: parseFloat(precio) || 0, icono: icono || '🎉', imagen_url };
     const promo = await prisma.promo.create({ data });
     res.status(201).json({ success: true, data: promo });
   } catch (error) {
@@ -23,13 +23,14 @@ const crearPromo = async (req, res) => {
 
 const editarPromo = async (req, res) => {
   const { id } = req.params;
-  const { titulo, descripcion, precio, icono, activa } = req.body;
+  const { titulo, descripcion, precio, icono, imagen_url, activa } = req.body;
   try {
     const data = {};
     if (titulo !== undefined) data.titulo = titulo;
     if (descripcion !== undefined) data.descripcion = descripcion;
     if (precio !== undefined) data.precio = parseFloat(precio);
     if (icono !== undefined) data.icono = icono;
+    if (imagen_url !== undefined) data.imagen_url = imagen_url;
     if (activa !== undefined) data.activa = activa;
     const promo = await prisma.promo.update({ where: { id: parseInt(id) }, data });
     res.json({ success: true, data: promo });
