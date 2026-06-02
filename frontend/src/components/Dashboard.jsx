@@ -11,24 +11,24 @@ import StockView from './StockView';
 
 const tabsPorRol = {
   Administrador: [
-    { id: 'pedidos', label: 'Pedidos', icon: '📋' },
-    { id: 'productos', label: 'Productos', icon: '🧁' },
-    { id: 'pagos', label: 'Pagos', icon: '💰' },
-    { id: 'ganancia', label: 'Ganancia', icon: '📊' },
-    { id: 'inventario', label: 'Inventario', icon: '📦' },
-    { id: 'stock', label: 'Stock', icon: '🏷️' },
-    { id: 'asistencia', label: 'Asistencia', icon: '⏱️' },
-    { id: 'promos', label: 'Promos', icon: '🎉' },
+    { id: 'pedidos', label: 'Pedidos' },
+    { id: 'productos', label: 'Productos' },
+    { id: 'pagos', label: 'Pagos' },
+    { id: 'ganancia', label: 'Ganancia' },
+    { id: 'inventario', label: 'Inventario' },
+    { id: 'stock', label: 'Stock' },
+    { id: 'asistencia', label: 'Asistencia' },
+    { id: 'promos', label: 'Promos' },
   ],
   Empleado: [
-    { id: 'asistencia', label: 'Asistencia', icon: '⏱️' },
-    { id: 'pedidos', label: 'Pedidos', icon: '📋' },
-    { id: 'productos', label: 'Productos', icon: '🧁' },
-    { id: 'promos', label: 'Promos', icon: '🎉' },
+    { id: 'asistencia', label: 'Asistencia' },
+    { id: 'pedidos', label: 'Pedidos' },
+    { id: 'productos', label: 'Productos' },
+    { id: 'promos', label: 'Promos' },
   ],
   Cliente: [
-    { id: 'productos', label: 'Productos', icon: '🧁' },
-    { id: 'promos', label: 'Promos', icon: '🎉' },
+    { id: 'productos', label: 'Productos' },
+    { id: 'promos', label: 'Promos' },
   ],
 };
 
@@ -57,11 +57,11 @@ export default function Dashboard({ session, onLogout }) {
         setRegForm({ nombre: '', email: '', password: '', cargo: '' });
         setShowRegEmpleado(false);
       } else {
-        setRegMsg('❌ ' + (res.error || res.message || 'Error del servidor'));
+        setRegMsg('' + (res.error || res.message || 'Error del servidor'));
       }
     } catch (err) {
       setRegLoading(false);
-      setRegMsg('❌ Error de conexión: ' + err.message);
+      setRegMsg(' Error de conexión: ' + err.message);
     }
   };
 
@@ -86,13 +86,12 @@ export default function Dashboard({ session, onLogout }) {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all
+              className={`w-full flex items-center px-3 py-2.5 rounded-xl text-sm transition-all
                 ${tab === t.id
                   ? 'bg-emerald-50 text-emerald-700 font-medium'
                   : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                 }`}
             >
-              <span className="text-base">{t.icon}</span>
               {t.label}
             </button>
           ))}

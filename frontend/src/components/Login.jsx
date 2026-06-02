@@ -29,7 +29,7 @@ export default function Login({ onLogin, onCancel }) {
     const resLogin = await api.login(email, password);
     setLoading(false);
     if (resLogin.token) onLogin(resLogin);
-    else setError('✅ Registrado. Inicia sesión.');
+    else setError(' Registrado. Inicia sesión.');
   };
 
   const contenido = (
@@ -73,7 +73,7 @@ export default function Login({ onLogin, onCancel }) {
               onChange={e => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 transition-colors placeholder:text-stone-300" required />
           </div>
-          {error && <p className={`text-xs text-center ${error.includes('✅') ? 'text-emerald-600' : 'text-red-500'}`}>{error}</p>}
+          {error && <p className={`text-xs text-center ${error.includes('') ? 'text-emerald-600' : 'text-red-500'}`}>{error}</p>}
           <button type="submit" disabled={loading}
             className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
             {loading ? 'Entrando...' : 'Entrar'}

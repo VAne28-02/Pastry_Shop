@@ -107,7 +107,7 @@ export default function PromosView({ session, token }) {
                 {p.imagen_url ? (
                   <img src={p.imagen_url} alt={p.titulo} className="w-full h-full object-cover rounded-lg" />
                 ) : (
-                  <span className="text-3xl opacity-50">{p.icono || '🎉'}</span>
+                  <span className="text-2xl opacity-20">⊘</span>
                 )}
               </div>
               <h3 className="font-medium text-sm text-stone-800">{p.titulo}</h3>

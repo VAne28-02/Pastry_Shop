@@ -55,10 +55,10 @@ export default function ProductosView({ token, session }) {
     });
     setEnviando(false);
     if (res.success) {
-      setMensaje('✅ Pedido registrado');
+      setMensaje('Pedido registrado');
       setTimeout(() => { setModal(null); setMensaje(''); }, 1200);
     } else {
-      setMensaje('❌ ' + (res.error || 'Error'));
+      setMensaje('' + (res.error || 'Error'));
     }
   };
 
@@ -135,7 +135,7 @@ export default function ProductosView({ token, session }) {
                   {p.imagen_url ? (
                     <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover rounded-lg" />
                   ) : (
-                    <span className="text-3xl opacity-30">🧁</span>
+                    <span className="text-3xl opacity-30"></span>
                   )}
                 </div>
                 <h3 className="font-medium text-sm text-stone-800">{p.nombre}</h3>
