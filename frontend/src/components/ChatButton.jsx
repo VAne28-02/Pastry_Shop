@@ -187,7 +187,7 @@ export default function ChatButton({ session }) {
               <div className="flex gap-1.5 px-3 pt-2 pb-1 overflow-x-auto">
                 <button onClick={abrirCategorias}
                   className="shrink-0 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-[10px] font-medium hover:bg-emerald-100 transition-colors flex items-center gap-1">
-                  <span>🍽️</span> Ver Menú
+                  <span></span> Ver Menú
                 </button>
               </div>
             )}

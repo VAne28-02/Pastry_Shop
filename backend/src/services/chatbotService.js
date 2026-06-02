@@ -60,10 +60,10 @@ const responderPreguntaConHistorial = async (identificador, mensajeUsuario, cont
       if (empleado) {
         const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
         const asisHoy = await prisma.asistencia.findFirst({ where: { empleado_id: empleado.id, hora_entrada: { gte: hoy } } });
-        datosContexto += `👤 Tu perfil: ${empleado.nombre} (${empleado.cargo})\n`;
-        datosContexto += `⏱ Asistencia hoy: ${asisHoy ? (asisHoy.hora_salida ? 'Completa (entrada y salida)' : 'Solo entrada registrada') : 'No has marcado entrada aún'}\n`;
+        datosContexto += `Tu perfil: ${empleado.nombre} (${empleado.cargo})\n`;
+        datosContexto += `Asistencia hoy: ${asisHoy ? (asisHoy.hora_salida ? 'Completa (entrada y salida)' : 'Solo entrada registrada') : 'No has marcado entrada aún'}\n`;
       }
-      datosContexto += `📊 Total pedidos pendientes/PREPARANDO: ${pedidosPendientes}\n`;
+      datosContexto += `Total pedidos pendientes/PREPARANDO: ${pedidosPendientes}\n`;
 
       const pedidosDetalle = await prisma.pedido.findMany({
         where: { estado: { in: ['pendiente', 'PREPARANDO', 'LISTO'] } },
@@ -72,11 +72,11 @@ const responderPreguntaConHistorial = async (identificador, mensajeUsuario, cont
         take: 20
       });
       if (pedidosDetalle.length > 0) {
-        datosContexto += `\n📋 **PEDIDOS DETALLADOS (pendientes/PREPARANDO/LISTO):**\n`;
+        datosContexto += `\n **PEDIDOS DETALLADOS (pendientes/PREPARANDO/LISTO):**\n`;
         for (const p of pedidosDetalle) {
           const cliente = p.cliente?.nombre || 'Cliente ocasional';
-          const items = p.detalles.map(d => `${d.cantidad}x ${d.producto.nombre} ($${d.subtotal})`).join(', ');
-          datosContexto += `  • #${p.id} | ${cliente} | ${p.tipo} | $${p.total} | ${p.estado} | ${items}\n`;
+          const items = p.detalles.map(d => `${d.cantidad}x ${d.producto.nombre} (S/.${d.subtotal})`).join(', ');
+          datosContexto += `  • #${p.id} | ${cliente} | ${p.tipo} | S/.${p.total} | ${p.estado} | ${items}\n`;
         }
       }
     }
@@ -85,8 +85,8 @@ const responderPreguntaConHistorial = async (identificador, mensajeUsuario, cont
       if (sesion.cliente_id) {
         const cliente = await prisma.cliente.findUnique({ where: { id: sesion.cliente_id }, include: { pedidos: { take: 3, orderBy: { id: 'desc' } } } });
         if (cliente) {
-          datosContexto += `👤 Cliente: ${cliente.nombre}\n`;
-          datosContexto += `📦 Tus últimos pedidos: ${cliente.pedidos.map(p => `#${p.id} (${p.estado} - $${p.total})`).join(', ') || 'Ninguno aún'}\n`;
+          datosContexto += ` Cliente: ${cliente.nombre}\n`;
+          datosContexto += `Tus últimos pedidos: ${cliente.pedidos.map(p => `#${p.id} (${p.estado} - S/.${p.total})`).join(', ') || 'Ninguno aún'}\n`;
         }
       }
     }
@@ -98,6 +98,9 @@ const responderPreguntaConHistorial = async (identificador, mensajeUsuario, cont
     ).join('\n\n');
 
     const systemPrompt = `Eres "GourmetBot", el asistente virtual exclusivo de la Pastelería Saludable. Responde SOLO preguntas sobre el sistema de la pastelería (productos, pedidos, promos, menú, roles, asistencia, etc.).
+
+**⚠️ REGLA #1 — MONEDA: SIEMPRE usa "S/." (NUNCA uses "$")**
+Todos los precios en la pastelería están en Soles Peruanos (S/.). Ejemplos correctos: "S/.8", "S/.13", "S/.21", "S/.50". NUNCA uses "$", "USD", "dólares", ni ningún otro símbolo de moneda. Siempre es "S/." antes del número.
 
 **REGLAS ESTRICTAS:**
 - Si te preguntan algo que NO esté relacionado con la pastelería (matemáticas, física, historia, cultura general, programación, etc.), responde: "Solo puedo ayudarte con información sobre nuestros productos, pedidos y servicios de la pastelería. ¿En qué más puedo ayudarte?"
@@ -129,6 +132,7 @@ ${menuPorCategoria}
 3. Si un cliente pregunta por algo que NO está en el menú, dile amablemente que no lo tenemos y sugiérele productos del menú.
 4. NO menciones stock ni cantidades. Solo precios.
 5. Cuando el cliente pida un producto específico, pregúntale si desea algo más o si desea finalizar el pedido.
+6. **SIEMPRE usa S/. (Sol Peruano) para precios. NUNCA uses $.**
 
 ### Pedidos
 - Estados: Pendiente → Preparando → Listo → Entregado (también: Cancelado).
@@ -166,6 +170,7 @@ Reglas de conversación:
 
     const chatCompletion = await groq.chat.completions.create({ messages: mensajesParaIA, model: 'llama-3.3-70b-versatile', temperature: 0.6 });
     let respuestaFinal = chatCompletion.choices[0].message.content;
+    respuestaFinal = respuestaFinal.replace(/\$(\d+(\.\d+)?)/g, 'S/.$1');
 
     if (respuestaFinal.includes("[NOMBRE:")) {
       const match = respuestaFinal.match(/\[NOMBRE: (.*?)\]/);
@@ -208,7 +213,7 @@ Reglas de conversación:
           await tx.pedido.update({ where: { id: nuevoPedido.id }, data: { total: totalPedido } });
           await tx.pago.create({ data: { pedido_id: nuevoPedido.id, monto: totalPedido, metodo_pago: "efectivo" } });
         });
-        respuestaFinal = respuestaFinal.replace("[PEDIDO_FINALIZADO]", `✅ ¡Pedido registrado! Total: $${totalPedido}. Tipo: ${tipoPedido === 'delivery' ? 'Delivery' : 'Consumir aquí'}. Pago: efectivo.`).trim();
+        respuestaFinal = respuestaFinal.replace("[PEDIDO_FINALIZADO]", ` ¡Pedido registrado! Total: S/.${totalPedido}. Tipo: ${tipoPedido === 'delivery' ? 'Delivery' : 'Consumir aquí'}. Pago: efectivo.`).trim();
       } else if (datosPedido.items.length > 0 && !sesion.cliente_id) {
         respuestaFinal = respuestaFinal.replace("[PEDIDO_FINALIZADO]", "Por favor dime tu nombre primero para registrar el pedido.").trim();
       } else {

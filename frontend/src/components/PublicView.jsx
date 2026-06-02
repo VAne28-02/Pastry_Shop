@@ -65,8 +65,8 @@ export default function PublicView({ onOpenLogin }) {
 
       {/* Hero */}
       <section id="inicio" className="max-w-4xl mx-auto px-6 py-28 md:py-36 text-center">
-        <div className="inline-flex items-center gap-2 bg-stone-100 text-stone-500 text-xs px-4 py-1.5 rounded-full mb-8">
-          <span>🐾</span> Pastelería Saludable & Pet-Friendly
+        <div className="inline-flex items-center bg-stone-100 text-stone-500 text-xs px-4 py-1.5 rounded-full mb-8">
+          Pastelería Saludable & Pet-Friendly
         </div>
         <h1 className="text-3xl sm:text-4xl md:text-5xl text-stone-800 leading-tight mb-6 font-light tracking-tight">
           Postres que{' '}
@@ -103,7 +103,7 @@ export default function PublicView({ onOpenLogin }) {
                   <img src={p.imagen_url} alt={p.titulo} className="w-full h-40 object-cover" />
                 ) : (
                   <div className={`h-40 flex items-center justify-center ${fondos[i % fondos.length]}`}>
-                    <span className="text-4xl">{p.icono || '🎉'}</span>
+                    <span className="text-4xl">{p.icono}</span>
                   </div>
                 )}
                 <div className="p-5">
@@ -146,7 +146,7 @@ export default function PublicView({ onOpenLogin }) {
                   {p.imagen_url ? (
                     <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-3xl opacity-30">🧁</span>
+                    <span className="text-2xl opacity-20">⊘</span>
                   )}
                 </div>
                 <div>
@@ -172,12 +172,11 @@ export default function PublicView({ onOpenLogin }) {
         <p className="text-xs text-stone-400 mb-12 max-w-xs mx-auto">Todo lo que ofrecemos para consentirte a ti y a tu mascota</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: '🥡', title: 'Delivery', desc: 'Llevamos tus postres favoritos a la puerta de tu casa.' },
-            { icon: '🐾', title: 'Pet-Friendly', desc: 'Snacks saludables para tu mascota con ingredientes naturales.' },
-            { icon: '🎂', title: 'Pedidos Personalizados', desc: 'Postres hechos a tu medida para eventos y celebraciones.' },
+            { title: 'Delivery', desc: 'Llevamos tus postres favoritos a la puerta de tu casa.' },
+            { title: 'Pet-Friendly', desc: 'Snacks saludables para tu mascota con ingredientes naturales.' },
+            { title: 'Pedidos Personalizados', desc: 'Postres hechos a tu medida para eventos y celebraciones.' },
           ].map((s, i) => (
             <div key={i} className="px-6 py-10">
-              <span className="text-3xl block mb-4">{s.icon}</span>
               <h3 className="text-sm text-stone-700 mb-2">{s.title}</h3>
               <p className="text-xs text-stone-400 leading-relaxed max-w-xs mx-auto">{s.desc}</p>
             </div>
@@ -192,12 +191,11 @@ export default function PublicView({ onOpenLogin }) {
           <p className="text-xs text-stone-400 mb-10">Estamos aquí para ayudarte.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
             {[
-              { icon: '📞', label: '+51 999 999 999', sub: 'Lun-Sáb 9am-8pm' },
-              { icon: '📧', label: 'contacto@nuconexion.pe', sub: 'Respuesta en 24h' },
-              { icon: '📍', label: 'Av. Las Americas 128', sub: 'Hunter, Arequipa' },
+              { label: '+51 999 999 999', sub: 'Lun-Sáb 9am-8pm' },
+              { label: 'contacto@nuconexion.pe', sub: 'Respuesta en 24h' },
+              { label: 'Av. Las Americas 128', sub: 'Hunter, Arequipa' },
             ].map((c, i) => (
               <div key={i} className="px-4 py-6">
-                <span className="text-xl block mb-3 opacity-60">{c.icon}</span>
                 <p className="text-sm text-stone-300">{c.label}</p>
                 <p className="text-xs text-stone-500 mt-1">{c.sub}</p>
               </div>
