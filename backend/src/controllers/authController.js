@@ -10,39 +10,35 @@ const registrar = async (req, res) => {
     const existe = await prisma.usuario.findUnique({ where: { email } });
     if (existe) return res.status(409).json({ message: "El email ya está registrado" });
 
-    const salt = await bcrypt.genSalt(10);
-    const password_hash = await bcrypt.hash(password, salt);
-    const resultado = await prisma.$transaction(async (tx) => {
-      const usuario = await tx.usuario.create({
-        data: {
-          email,
-          password_hash,
-          rol: {
-            connectOrCreate: {
-              where: { nombre: tipoRol },
-              create: { nombre: tipoRol }
-            }
+    const password_hash = await bcrypt.hash(password, 6);
+    const usuario = await prisma.usuario.create({
+      data: {
+        email,
+        password_hash,
+        rol: {
+          connectOrCreate: {
+            where: { nombre: tipoRol },
+            create: { nombre: tipoRol }
           }
         }
-      });
-      if (tipoRol === 'Empleado') {
-        const empleado = await tx.empleado.create({
-          data: { usuario_id: usuario.id, nombre, cargo: cargo || 'Empleado' }
-        });
-        return { usuario, empleado };
       }
-      const cliente = telefono
-        ? await tx.cliente.upsert({
-            where: { telefono },
-            update: { usuario_id: usuario.id, nombre },
-            create: { usuario_id: usuario.id, nombre, telefono }
-          })
-        : await tx.cliente.create({
-            data: { usuario_id: usuario.id, nombre }
-          });
-      return { usuario, cliente };
     });
-    res.status(201).json({ message: `${tipoRol} registrado`, usuario: resultado.usuario });
+    if (tipoRol === 'Empleado') {
+      await prisma.empleado.create({
+        data: { usuario_id: usuario.id, nombre, cargo: cargo || 'Empleado' }
+      });
+    } else if (telefono) {
+      await prisma.cliente.upsert({
+        where: { telefono },
+        update: { usuario_id: usuario.id, nombre },
+        create: { usuario_id: usuario.id, nombre, telefono }
+      });
+    } else {
+      await prisma.cliente.create({
+        data: { usuario_id: usuario.id, nombre }
+      });
+    }
+    res.status(201).json({ message: `${tipoRol} registrado`, usuario });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

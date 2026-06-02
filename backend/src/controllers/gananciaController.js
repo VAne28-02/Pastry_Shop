@@ -3,13 +3,12 @@ const prisma = require('../config/db');
 const gananciaDiaria = async (req, res) => {
   const { fecha } = req.query;
   try {
-    const dia = fecha ? new Date(fecha) : new Date();
-    dia.setHours(0, 0, 0, 0);
-    const manana = new Date(dia);
-    manana.setDate(manana.getDate() + 1);
+    const diaStr = fecha || new Date().toISOString().split('T')[0];
+    const dia = new Date(diaStr + 'T00:00:00.000');
+    const manana = new Date(diaStr + 'T23:59:59.999');
 
     const pagos = await prisma.pago.findMany({
-      where: { fecha_pago: { gte: dia, lt: manana } },
+      where: { fecha_pago: { gte: dia, lte: manana } },
       include: { pedido: true }
     });
 
@@ -18,7 +17,7 @@ const gananciaDiaria = async (req, res) => {
     const gananciaNeta = ingresos - costoEst;
 
     res.json({
-      fecha: dia.toISOString().split('T')[0],
+      fecha: diaStr,
       ingresos,
       costoEstimado: Math.round(costoEst * 100) / 100,
       gananciaNeta: Math.round(gananciaNeta * 100) / 100,
@@ -33,10 +32,9 @@ const gananciaDiaria = async (req, res) => {
 const gananciaPorRango = async (req, res) => {
   const { desde, hasta } = req.query;
   try {
-    const fechaDesde = desde ? new Date(desde) : new Date(new Date().setDate(new Date().getDate() - 30));
-    fechaDesde.setHours(0, 0, 0, 0);
-    const fechaHasta = hasta ? new Date(hasta) : new Date();
-    fechaHasta.setHours(23, 59, 59, 999);
+    const hoy = new Date().toISOString().split('T')[0];
+    const fechaDesde = new Date((desde || hoy) + 'T00:00:00.000');
+    const fechaHasta = new Date((hasta || hoy) + 'T23:59:59.999');
 
     const pagos = await prisma.pago.findMany({
       where: { fecha_pago: { gte: fechaDesde, lte: fechaHasta } },
@@ -48,8 +46,8 @@ const gananciaPorRango = async (req, res) => {
     const gananciaNeta = ingresos - costoEst;
 
     res.json({
-      desde: fechaDesde.toISOString().split('T')[0],
-      hasta: fechaHasta.toISOString().split('T')[0],
+      desde: desde || hoy,
+      hasta: hasta || hoy,
       ingresos,
       gananciaNeta: Math.round(gananciaNeta * 100) / 100,
       porcentaje: ingresos > 0 ? Math.round((gananciaNeta / ingresos) * 100) : 0,
@@ -60,4 +58,40 @@ const gananciaPorRango = async (req, res) => {
   }
 };
 
-module.exports = { gananciaDiaria, gananciaPorRango };
+const gananciaDiariaRango = async (req, res) => {
+  const { desde, hasta } = req.query;
+  try {
+    const hoy = new Date().toISOString().split('T')[0];
+    const fechaDesde = new Date((desde || hoy) + 'T00:00:00.000');
+    const fechaHasta = new Date((hasta || hoy) + 'T23:59:59.999');
+
+    const pagos = await prisma.pago.findMany({
+      where: { fecha_pago: { gte: fechaDesde, lte: fechaHasta } },
+      include: { pedido: true },
+      orderBy: { fecha_pago: 'asc' }
+    });
+
+    const dias = {};
+    for (const p of pagos) {
+      const dia = p.fecha_pago.toISOString().split('T')[0];
+      if (!dias[dia]) dias[dia] = { ingresos: 0, transacciones: 0 };
+      dias[dia].ingresos += p.monto;
+      dias[dia].transacciones++;
+    }
+
+    const datosDiarios = Object.entries(dias).map(([fecha, d]) => ({
+      fecha,
+      ingresos: Math.round(d.ingresos * 100) / 100,
+      costoEstimado: Math.round(d.ingresos * 0.4 * 100) / 100,
+      gananciaNeta: Math.round((d.ingresos - d.ingresos * 0.4) * 100) / 100,
+      porcentaje: d.ingresos > 0 ? 60 : 0,
+      transacciones: d.transacciones
+    })).sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+    res.json({ success: true, data: datosDiarios });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { gananciaDiaria, gananciaPorRango, gananciaDiariaRango };
