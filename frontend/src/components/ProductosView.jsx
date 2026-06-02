@@ -19,7 +19,7 @@ export default function ProductosView({ token, session }) {
 
   const [adminModal, setAdminModal] = useState(null);
   const [editProd, setEditProd] = useState(null);
-  const [formProd, setFormProd] = useState({ nombre: '', descripcion: '', precio_base: '', categoria_id: '', imagen_url: '' });
+  const [formProd, setFormProd] = useState({ nombre: '', descripcion: '', precio_base: '', categoria_id: '', imagen_url: '', stock: 0 });
 
   const esAdmin = session?.rol_nombre === 'Administrador';
 
@@ -67,9 +67,9 @@ export default function ProductosView({ token, session }) {
     const res = await fetch(`${API}/productos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ ...formProd, precio_base: parseFloat(formProd.precio_base), categoria_id: parseInt(formProd.categoria_id) })
+      body: JSON.stringify({ ...formProd, precio_base: parseFloat(formProd.precio_base), categoria_id: parseInt(formProd.categoria_id), stock: parseInt(formProd.stock) })
     });
-    if (res.ok) { setAdminModal(null); setFormProd({ nombre: '', descripcion: '', precio_base: '', categoria_id: '', imagen_url: '' }); cargar(); }
+    if (res.ok) { setAdminModal(null); setFormProd({ nombre: '', descripcion: '', precio_base: '', categoria_id: '', imagen_url: '', stock: 0 }); cargar(); }
   };
 
   const guardarEdicion = async () => {
@@ -77,7 +77,7 @@ export default function ProductosView({ token, session }) {
     const res = await fetch(`${API}/productos/${editProd.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ ...editProd, precio_base: parseFloat(editProd.precio_base), categoria_id: parseInt(editProd.categoria_id) })
+      body: JSON.stringify({ ...editProd, precio_base: parseFloat(editProd.precio_base), categoria_id: parseInt(editProd.categoria_id), stock: parseInt(editProd.stock) })
     });
     if (res.ok) { setEditProd(null); cargar(); }
   };
@@ -95,18 +95,18 @@ export default function ProductosView({ token, session }) {
     <div className="p-8 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-xl font-medium text-neutral-900">Productos</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">{productos.length} productos</p>
+          <h1 className="text-xl font-medium text-stone-800">Productos</h1>
+          <p className="text-sm text-stone-400 mt-0.5">{productos.length} productos</p>
         </div>
         <div className="flex items-center gap-3">
           {esAdmin && (
             <button onClick={() => setAdminModal('crear')}
-              className="px-4 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors">
+              className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
               + Nuevo Producto
             </button>
           )}
           <select value={filtroCat} onChange={e => setFiltroCat(e.target.value)}
-            className="text-sm bg-white border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-400 text-neutral-600">
+            className="text-sm bg-white border border-stone-200 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-300 text-stone-600">
             <option value="">Todas las categorías</option>
             {categorias.map(c => (
               <option key={c.id} value={c.id}>{c.nombre}</option>
@@ -116,34 +116,34 @@ export default function ProductosView({ token, session }) {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-neutral-300 text-sm">Cargando...</div>
+        <div className="text-center py-20 text-stone-300 text-sm">Cargando...</div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtrados.map(p => (
             <div key={p.id}
-              className="bg-white rounded-xl border border-neutral-100 p-5 relative group">
+              className="bg-white rounded-xl border border-stone-200 p-5 relative group hover:border-emerald-200 hover:shadow-sm transition-all">
               {esAdmin && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => setEditProd({ ...p, precio_base: p.precio_base?.toString() || '', categoria_id: p.categoria_id?.toString() || '' })}
-                    className="text-xs w-7 h-7 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 flex items-center justify-center">✎</button>
+                    className="text-xs w-7 h-7 bg-white text-blue-600 rounded-lg border border-stone-200 hover:bg-blue-50 flex items-center justify-center shadow-sm">✎</button>
                   <button onClick={() => eliminarProducto(p.id, p.nombre)}
-                    className="text-xs w-7 h-7 bg-neutral-100 text-neutral-500 rounded hover:bg-neutral-200 flex items-center justify-center">✕</button>
+                    className="text-xs w-7 h-7 bg-white text-red-500 rounded-lg border border-stone-200 hover:bg-red-50 flex items-center justify-center shadow-sm">✕</button>
                 </div>
               )}
               <button onClick={() => abrirFormulario(p)} className="text-left w-full">
-                <div className="w-full h-24 bg-neutral-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                <div className="w-full h-24 bg-stone-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                   {p.imagen_url ? (
                     <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover rounded-lg" />
                   ) : (
                     <span className="text-3xl opacity-30">🧁</span>
                   )}
                 </div>
-                <h3 className="font-medium text-sm text-neutral-900">{p.nombre}</h3>
-                {p.descripcion && <p className="text-xs text-neutral-400 mt-1 line-clamp-2">{p.descripcion}</p>}
+                <h3 className="font-medium text-sm text-stone-800">{p.nombre}</h3>
+                {p.descripcion && <p className="text-xs text-stone-400 mt-1 line-clamp-2">{p.descripcion}</p>}
                 <div className="flex items-center justify-between mt-3">
-                  <span className="text-lg font-light text-neutral-900">S/.{p.precio_base}</span>
+                  <span className="text-lg font-light text-stone-800">S/.{p.precio_base}</span>
                   {p.categoria && (
-                    <span className="text-[10px] text-neutral-400 bg-neutral-50 px-2 py-0.5 rounded-full">{p.categoria.nombre}</span>
+                    <span className="text-[10px] text-stone-400 bg-stone-50 px-2 py-0.5 rounded-full border border-stone-200">{p.categoria.nombre}</span>
                   )}
                 </div>
               </button>
@@ -155,47 +155,47 @@ export default function ProductosView({ token, session }) {
       {/* Modal pedido */}
       {modal && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4" onClick={() => !enviando && setModal(null)}>
-          <div className="bg-white rounded-xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl max-w-sm w-full p-6 shadow-lg" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-medium text-neutral-900">Nuevo Pedido</h2>
-              {!enviando && <button onClick={() => setModal(null)} className="text-neutral-300 hover:text-neutral-500 text-lg leading-none">&times;</button>}
+              <h2 className="text-sm font-medium text-stone-800">Nuevo Pedido</h2>
+              {!enviando && <button onClick={() => setModal(null)} className="text-stone-300 hover:text-stone-500 text-lg leading-none">&times;</button>}
             </div>
-            <div className="bg-neutral-50 rounded-lg p-3 mb-5">
+            <div className="bg-stone-50 rounded-lg p-3 mb-5">
               {modal.imagen_url && (
                 <img src={modal.imagen_url} alt={modal.nombre} className="w-full h-24 object-cover rounded-lg mb-3" />
               )}
-              <p className="font-medium text-sm text-neutral-900">{modal.nombre}</p>
-              <p className="text-xs text-neutral-400 mt-0.5">S/.{modal.precio_base} c/u</p>
+              <p className="font-medium text-sm text-stone-800">{modal.nombre}</p>
+              <p className="text-xs text-stone-400 mt-0.5">S/.{modal.precio_base} c/u</p>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-neutral-400 block mb-1">Cantidad</label>
+                <label className="text-xs text-stone-400 block mb-1">Cantidad</label>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                    className="w-8 h-8 rounded-lg border border-neutral-200 text-neutral-500 hover:border-neutral-400 transition-colors text-sm">-</button>
-                  <span className="w-10 text-center text-sm font-medium text-neutral-900">{cantidad}</span>
+                    className="w-8 h-8 rounded-lg border border-stone-200 text-stone-500 hover:border-emerald-300 transition-colors text-sm">-</button>
+                  <span className="w-10 text-center text-sm font-medium text-stone-800">{cantidad}</span>
                   <button onClick={() => setCantidad(cantidad + 1)}
-                    className="w-8 h-8 rounded-lg border border-neutral-200 text-neutral-500 hover:border-neutral-400 transition-colors text-sm">+</button>
+                    className="w-8 h-8 rounded-lg border border-stone-200 text-stone-500 hover:border-emerald-300 transition-colors text-sm">+</button>
                 </div>
               </div>
               <div>
-                <label className="text-xs text-neutral-400 block mb-1">Nombre del cliente</label>
+                <label className="text-xs text-stone-400 block mb-1">Nombre del cliente</label>
                 <input type="text" value={nombre} onChange={e => setNombre(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300"
+                  className="w-full px-3 py-2.5 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-emerald-300 transition-colors placeholder:text-stone-300"
                   placeholder="Obligatorio" />
               </div>
               <div>
-                <label className="text-xs text-neutral-400 block mb-1">Teléfono (opcional)</label>
+                <label className="text-xs text-stone-400 block mb-1">Teléfono (opcional)</label>
                 <input type="text" value={telefono} onChange={e => setTelefono(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300"
+                  className="w-full px-3 py-2.5 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-emerald-300 transition-colors placeholder:text-stone-300"
                   placeholder="Opcional" />
               </div>
               <div>
-                <label className="text-xs text-neutral-400 block mb-2">Tipo</label>
+                <label className="text-xs text-stone-400 block mb-2">Tipo</label>
                 <div className="flex gap-2">
                   {['aqui', 'delivery'].map(t => (
                     <button key={t} onClick={() => setTipo(t)}
-                      className={`flex-1 py-2.5 rounded-lg text-sm border transition-colors ${tipo === t ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'}`}>
+                      className={`flex-1 py-2.5 rounded-lg text-sm border transition-colors ${tipo === t ? 'bg-emerald-600 text-white border-emerald-600' : 'border-stone-200 text-stone-500 hover:border-emerald-300'}`}>
                       {t === 'aqui' ? 'Consumir aquí' : 'Delivery'}
                     </button>
                   ))}
@@ -204,7 +204,7 @@ export default function ProductosView({ token, session }) {
             </div>
             {mensaje && <p className="text-sm text-center mt-4">{mensaje}</p>}
             <button onClick={enviarPedido} disabled={enviando || !nombre.trim()}
-              className="w-full mt-5 py-3 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+              className="w-full mt-5 py-3 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
               {enviando ? 'Registrando...' : `Registrar pedido — S/.${(modal.precio_base * cantidad).toFixed(2)}`}
             </button>
           </div>
@@ -215,43 +215,50 @@ export default function ProductosView({ token, session }) {
       {adminModal === 'crear' && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setAdminModal(null)}>
           <div className="bg-white rounded-xl p-6 w-96 shadow-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-medium text-neutral-700 mb-4">Nuevo Producto</h3>
+            <h3 className="text-sm font-medium text-stone-700 mb-4">Nuevo Producto</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Nombre</label>
+                <label className="block text-xs text-stone-500 mb-1">Nombre</label>
                 <input value={formProd.nombre} onChange={e => setFormProd({...formProd, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Descripción</label>
+                <label className="block text-xs text-stone-500 mb-1">Descripción</label>
                 <textarea value={formProd.descripcion} onChange={e => setFormProd({...formProd, descripcion: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" rows="2" />
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" rows="2" />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Precio</label>
+                  <label className="block text-xs text-stone-500 mb-1">Precio</label>
                   <input type="number" step="0.01" value={formProd.precio_base}
                     onChange={e => setFormProd({...formProd, precio_base: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Categoría</label>
+                  <label className="block text-xs text-stone-500 mb-1">Categoría</label>
                   <select value={formProd.categoria_id} onChange={e => setFormProd({...formProd, categoria_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300 bg-white">
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white">
                     <option value="">Seleccionar</option>
                     {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs text-neutral-500 mb-1">URL imagen (opcional)</label>
-                <input value={formProd.imagen_url} onChange={e => setFormProd({...formProd, imagen_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-stone-500 mb-1">URL imagen (opcional)</label>
+                  <input value={formProd.imagen_url} onChange={e => setFormProd({...formProd, imagen_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                </div>
+                <div className="w-24">
+                  <label className="block text-xs text-stone-500 mb-1">Stock</label>
+                  <input type="number" min="0" value={formProd.stock} onChange={e => setFormProd({...formProd, stock: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                </div>
               </div>
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={crearProducto} className="flex-1 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors">Crear</button>
-              <button onClick={() => setAdminModal(null)} className="py-2 px-4 border border-neutral-200 text-sm rounded-lg hover:bg-neutral-50 transition-colors">Cancelar</button>
+              <button onClick={crearProducto} className="flex-1 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">Crear</button>
+              <button onClick={() => setAdminModal(null)} className="py-2 px-4 border border-stone-200 text-sm rounded-lg hover:bg-stone-50 transition-colors">Cancelar</button>
             </div>
           </div>
         </div>
@@ -261,43 +268,50 @@ export default function ProductosView({ token, session }) {
       {editProd && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditProd(null)}>
           <div className="bg-white rounded-xl p-6 w-96 shadow-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-medium text-neutral-700 mb-4">Editar Producto</h3>
+            <h3 className="text-sm font-medium text-stone-700 mb-4">Editar Producto</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Nombre</label>
+                <label className="block text-xs text-stone-500 mb-1">Nombre</label>
                 <input value={editProd.nombre} onChange={e => setEditProd({...editProd, nombre: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
               </div>
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Descripción</label>
+                <label className="block text-xs text-stone-500 mb-1">Descripción</label>
                 <textarea value={editProd.descripcion} onChange={e => setEditProd({...editProd, descripcion: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" rows="2" />
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" rows="2" />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Precio</label>
+                  <label className="block text-xs text-stone-500 mb-1">Precio</label>
                   <input type="number" step="0.01" value={editProd.precio_base}
                     onChange={e => setEditProd({...editProd, precio_base: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Categoría</label>
+                  <label className="block text-xs text-stone-500 mb-1">Categoría</label>
                   <select value={editProd.categoria_id} onChange={e => setEditProd({...editProd, categoria_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300 bg-white">
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white">
                     <option value="">Seleccionar</option>
                     {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs text-neutral-500 mb-1">URL imagen (opcional)</label>
-                <input value={editProd.imagen_url} onChange={e => setEditProd({...editProd, imagen_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-stone-500 mb-1">URL imagen (opcional)</label>
+                  <input value={editProd.imagen_url} onChange={e => setEditProd({...editProd, imagen_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                </div>
+                <div className="w-24">
+                  <label className="block text-xs text-stone-500 mb-1">Stock</label>
+                  <input type="number" min="0" value={editProd.stock} onChange={e => setEditProd({...editProd, stock: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                </div>
               </div>
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={guardarEdicion} className="flex-1 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors">Guardar</button>
-              <button onClick={() => setEditProd(null)} className="py-2 px-4 border border-neutral-200 text-sm rounded-lg hover:bg-neutral-50 transition-colors">Cancelar</button>
+              <button onClick={guardarEdicion} className="flex-1 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">Guardar</button>
+              <button onClick={() => setEditProd(null)} className="py-2 px-4 border border-stone-200 text-sm rounded-lg hover:bg-stone-50 transition-colors">Cancelar</button>
             </div>
           </div>
         </div>

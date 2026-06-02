@@ -7,8 +7,6 @@ export default function Login({ onLogin, onCancel }) {
   const [password, setPassword] = useState('');
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
-  const [cargo, setCargo] = useState('');
-  const [rolReg, setRolReg] = useState('cliente');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,92 +20,95 @@ export default function Login({ onLogin, onCancel }) {
 
   const handleRegister = async (e) => {
     e.preventDefault(); setError(''); setLoading(true);
-    const body = { email, password, nombre, rol: rolReg };
-    if (rolReg === 'empleado') body.cargo = cargo || undefined;
-    else body.telefono = telefono || undefined;
-    const res = await api.register(body);
+    const body = { email, password, nombre, rol: 'cliente', telefono: telefono || undefined };
+    const resReg = await api.register(body);
+    if (!resReg.usuario) {
+      setLoading(false);
+      return setError(resReg.error || 'Error al registrar');
+    }
+    const resLogin = await api.login(email, password);
     setLoading(false);
-    if (res.usuario) {
-      setError('✅ Registrado. Ahora inicia sesión.');
-      setModo('login');
-    } else setError(res.error || 'Error al registrar');
+    if (resLogin.token) onLogin(resLogin);
+    else setError('✅ Registrado. Inicia sesión.');
   };
 
   const contenido = (
-    <div className={onCancel ? 'bg-white rounded-xl p-6 shadow-lg max-w-sm' : ''}>
+    <div className={onCancel ? 'bg-white rounded-2xl p-6 shadow-lg border border-stone-200 max-w-sm' : ''}>
       {onCancel && (
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-neutral-900">Iniciar sesión</h2>
-          <button onClick={onCancel} className="text-neutral-300 hover:text-neutral-500 text-lg leading-none">&times;</button>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-sm font-medium text-stone-800">Iniciar sesión</h2>
+          <button onClick={onCancel} className="text-stone-300 hover:text-stone-500 text-lg leading-none">&times;</button>
         </div>
       )}
       {!onCancel && (
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-neutral-900 rounded-full mx-auto mb-3 flex items-center justify-center">
-            <span className="text-white text-xl font-serif">P</span>
-          </div>
-          <h1 className="text-xl font-medium text-neutral-900 tracking-tight">Pastelería</h1>
-          <p className="text-neutral-400 text-sm mt-1">Panel de administración</p>
+          <img src="/diseno_web/logo.png" alt="NuConexion" className="h-14 mx-auto mb-4" />
+          <h1 className="text-xl font-medium text-stone-800">Bienvenido</h1>
+          <p className="text-stone-400 text-sm mt-1">Accede a tu cuenta</p>
         </div>
       )}
 
-      <div className="flex mb-6 bg-neutral-100 rounded-lg p-1">
+      <div className="flex mb-6 bg-stone-100 rounded-xl p-1">
         <button onClick={() => { setModo('login'); setError(''); }}
-          className={`flex-1 py-2 text-sm rounded-md transition-colors ${modo === 'login' ? 'bg-white text-neutral-900 font-medium shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}>
+          className={`flex-1 py-2.5 text-sm rounded-lg transition-all ${modo === 'login' ? 'bg-white text-emerald-700 font-medium shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>
           Iniciar Sesión
         </button>
         <button onClick={() => { setModo('register'); setError(''); }}
-          className={`flex-1 py-2 text-sm rounded-md transition-colors ${modo === 'register' ? 'bg-white text-neutral-900 font-medium shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}>
+          className={`flex-1 py-2.5 text-sm rounded-lg transition-all ${modo === 'register' ? 'bg-white text-emerald-700 font-medium shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>
           Registrarse
         </button>
       </div>
 
       {modo === 'login' ? (
         <form onSubmit={handleLogin} className="space-y-4">
-          <input type="email" placeholder="Correo electrónico" value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" required />
-          <input type="password" placeholder="Contraseña" value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" required />
-          {error && <p className={`text-xs text-center ${error.includes('✅') ? 'text-green-600' : 'text-red-500'}`}>{error}</p>}
+          <div>
+            <label className="text-xs text-stone-500 block mb-1.5 font-medium">Correo electrónico</label>
+            <input type="email" placeholder="correo@ejemplo.com" value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 transition-colors placeholder:text-stone-300" required />
+          </div>
+          <div>
+            <label className="text-xs text-stone-500 block mb-1.5 font-medium">Contraseña</label>
+            <input type="password" placeholder="••••••••" value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 transition-colors placeholder:text-stone-300" required />
+          </div>
+          {error && <p className={`text-xs text-center ${error.includes('✅') ? 'text-emerald-600' : 'text-red-500'}`}>{error}</p>}
           <button type="submit" disabled={loading}
-            className="w-full py-3 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+            className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       ) : (
         <form onSubmit={handleRegister} className="space-y-3">
-          <div className="flex gap-2">
-            {['cliente', 'empleado'].map(r => (
-              <button key={r} type="button" onClick={() => setRolReg(r)}
-                className={`flex-1 py-2.5 rounded-lg text-sm border transition-colors ${rolReg === r ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'}`}>
-                {r === 'cliente' ? 'Cliente' : 'Empleado'}
-              </button>
-            ))}
+          <div>
+            <label className="text-xs text-stone-500 block mb-1.5 font-medium">Nombre completo</label>
+            <input type="text" placeholder="Tu nombre" value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 placeholder:text-stone-300" required />
           </div>
-          <input type="text" placeholder="Nombre completo" value={nombre}
-            onChange={e => setNombre(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" required />
-          <input type="email" placeholder="Correo electrónico" value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" required />
-          <input type="password" placeholder="Contraseña" value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" required />
-          {rolReg === 'cliente' ? (
-            <input type="text" placeholder="Teléfono (opcional)" value={telefono}
+          <div>
+            <label className="text-xs text-stone-500 block mb-1.5 font-medium">Correo electrónico</label>
+            <input type="email" placeholder="correo@ejemplo.com" value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 placeholder:text-stone-300" required />
+          </div>
+          <div>
+            <label className="text-xs text-stone-500 block mb-1.5 font-medium">Contraseña</label>
+            <input type="password" placeholder="Mínimo 6 caracteres" value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 placeholder:text-stone-300" required />
+          </div>
+          <div>
+            <label className="text-xs text-stone-500 block mb-1.5 font-medium">Teléfono (opcional)</label>
+            <input type="text" placeholder="999 999 999" value={telefono}
               onChange={e => setTelefono(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" />
-          ) : (
-            <input type="text" placeholder="Cargo (ej: Pastelero, Cajero)" value={cargo}
-              onChange={e => setCargo(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-sm focus:outline-none focus:border-neutral-400 transition-colors placeholder:text-neutral-300" />
-          )}
-          {error && <p className={`text-xs text-center ${error.includes('✅') ? 'text-green-600' : 'text-red-500'}`}>{error}</p>}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 placeholder:text-stone-300" />
+          </div>
+          {error && <p className={`text-xs text-center ${error.includes('✅') ? 'text-emerald-600' : 'text-red-500'}`}>{error}</p>}
           <button type="submit" disabled={loading}
-            className="w-full py-3 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:opacity-50 transition-colors">
-            {loading ? 'Registrando...' : `Registrar ${rolReg === 'cliente' ? 'Cliente' : 'Empleado'}`}
+            className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
+            {loading ? 'Registrando...' : 'Crear cuenta'}
           </button>
         </form>
       )}
@@ -116,7 +117,7 @@ export default function Login({ onLogin, onCancel }) {
 
   if (onCancel) return contenido;
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-stone-50 to-amber-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">{contenido}</div>
     </div>
   );
