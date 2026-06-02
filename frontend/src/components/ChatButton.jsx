@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { api } from '../api';
 
-export default function ChatButton({ session }) {
+export default function ChatButton({ session, onBuscar }) {
   const [abierto, setAbierto] = useState(false);
   const [identificador, setIdentificador] = useState(session?.email || 'anon_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
   const [mensaje, setMensaje] = useState('');
@@ -53,7 +53,13 @@ export default function ChatButton({ session }) {
       body: JSON.stringify(body)
     }).then(r => r.json());
     setLoading(false);
-    setChat(c => [...c, { role: 'bot', content: res.success ? res.respuesta : (res.mensaje || 'Error') }]);
+    const respuesta = res.success ? res.respuesta : (res.mensaje || 'Error');
+    const buscarMatch = respuesta.match(/\[BUSCAR: (.*?)\]/);
+    if (buscarMatch && onBuscar) {
+      onBuscar(buscarMatch[1]);
+      setTimeout(() => document.getElementById('carta')?.scrollIntoView({ behavior: 'smooth' }), 300);
+    }
+    setChat(c => [...c, { role: 'bot', content: respuesta.replace(/\[BUSCAR: .*?\]/g, '').trim() }]);
   };
 
   const handleKeyDown = (e) => {

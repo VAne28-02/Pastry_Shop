@@ -17,6 +17,7 @@ export default function PublicView({ onOpenLogin }) {
   const [metodoPago, setMetodoPago] = useState('efectivo');
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [pedidoCreado, setPedidoCreado] = useState(null);
 
   useEffect(() => {
     fetch('http://localhost:3000/api/productos').then(r => r.json()).then(d => { if (Array.isArray(d)) setProductos(d); });
@@ -40,7 +41,8 @@ export default function PublicView({ onOpenLogin }) {
     setEnviando(false);
     if (res.success) {
       setMensaje('✅ Pedido registrado');
-      setTimeout(() => { setModal(null); setMensaje(''); setNombre(''); setTelefono(''); setCantidad(1); }, 1200);
+      setPedidoCreado(res.data?.id || res.pedido?.id);
+      setTimeout(() => { setModal(null); setMensaje(''); setNombre(''); setTelefono(''); setCantidad(1); setPedidoCreado(null); }, 3000);
     } else {
       setMensaje('❌ ' + (res.error || 'Error'));
     }
@@ -144,7 +146,7 @@ export default function PublicView({ onOpenLogin }) {
         </section>
       )}
 
-      <ChatButton />
+      <ChatButton onBuscar={setBusqueda} />
 
       {/* Productos */}
       <section id="carta" className="bg-gradient-to-b from-white to-emerald-50/30 border-t border-emerald-100/40">
@@ -308,7 +310,18 @@ export default function PublicView({ onOpenLogin }) {
                 </div>
               </div>
             </div>
-            {mensaje && <p className="text-sm text-center mt-4 text-emerald-600 font-medium">{mensaje}</p>}
+            {mensaje && (
+              <div className="text-center mt-4">
+                <p className="text-sm text-emerald-600 font-medium">{mensaje}</p>
+                {pedidoCreado && (
+                  <button onClick={() => window.open(`http://localhost:3000/api/factura/${pedidoCreado}`, '_blank')}
+                    className="mt-2 px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-[10px] text-stone-500 hover:bg-stone-100 hover:text-emerald-600 transition-all inline-flex items-center gap-1 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm2.25 8.5a.75.75 0 117.5 0 .75.75 0 01-7.5 0zm0 3a.75.75 0 117.5 0 .75.75 0 01-7.5 0z" clipRule="evenodd" /></svg>
+                    Generar Factura
+                  </button>
+                )}
+              </div>
+            )}
             <button onClick={enviarPedido} disabled={enviando || !nombre.trim()}
               className="w-full mt-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-lg text-sm font-semibold hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-50 transition-all shadow-md">
               {enviando ? 'Registrando...' : `Pedir — S/.${((modal.precio_base || modal.precio) * cantidad).toFixed(2)}`}
