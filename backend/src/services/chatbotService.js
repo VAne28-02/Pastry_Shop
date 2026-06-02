@@ -117,6 +117,11 @@ ${datosContexto}
 - Empleado (Pastelero, Barista, Limpieza, etc.): marca asistencia, ve y actualiza pedidos, usa el chat.
 - Cliente: ve productos, promos y puede pedir por chat.
 
+**SALUDO POR ROL:** Cuando un usuario te escriba por primera vez, salúdalo según su rol:
+- Si es **Cliente** o no hay rol: ofrécele el menú y las categorías disponibles.
+- Si es **Empleado**: indícale que puedes ayudarle con asistencia, pedidos y productos.
+- Si es **Administrador**: indícale que puedes ayudarle con la gestión completa del sistema.
+
 ### MENÚ - REGLAS DE NAVEGACIÓN:
 Cuando un cliente pregunte por el menú o qué productos hay disponibles:
 1. **PRIMERO muestra SOLO las categorías disponibles**: ${categoriasLista}. Pregunta al cliente qué categoría le gustaría ver.
@@ -142,7 +147,9 @@ ${menuPorCategoria}
 - El empleado TIENE acceso a la lista de pedidos detallados con cliente, productos, cantidades, subtotales, total, tipo y estado en los DATOS EN TIEMPO REAL. Puede responder preguntas como "¿qué pidió el cliente X?", "¿cuántos pedidos tiene Juan?", "dame detalles del pedido #5", etc.
 
 ### Pagos
-- Métodos: efectivo, tarjeta, transferencia, etc.
+- Métodos disponibles: efectivo, yape, transferencia.
+- Al finalizar un pedido, pregunta al cliente qué método de pago prefiere.
+- Captura el método con [PAGO: metodo] (ej: [PAGO: yape], [PAGO: transferencia], [PAGO: efectivo]).
 - Cada pedido genera un pago automático.
 
 ### Ganancias (solo Administrador)
@@ -162,6 +169,7 @@ Reglas de conversación:
 - Si el usuario finaliza su pedido y da todos los datos, responde con [PEDIDO_FINALIZADO].
 - Usa [NOMBRE: X] para capturar el nombre del cliente (ej: "Me llamo Juan" → [NOMBRE: Juan]).
 - Pregunta al cliente si es para "aqui" o "delivery" y captúralo con [TIPO: aqui] o [TIPO: delivery].
+- Pregunta al cliente qué método de pago prefiere (efectivo, yape, transferencia) y captúralo con [PAGO: metodo].
 - No inventes productos, solo usa los del menú.
 - Si preguntan por funciones del sistema, explica según los roles.`;
 
@@ -196,6 +204,14 @@ Reglas de conversación:
       respuestaFinal = respuestaFinal.replace(/\[TIPO: .*?\]/, "").trim();
     }
 
+    // Lógica de método de pago
+    let metodoPago = 'efectivo';
+    if (respuestaFinal.includes("[PAGO:")) {
+      const match = respuestaFinal.match(/\[PAGO: (.*?)\]/);
+      if (match && ['efectivo', 'yape', 'transferencia'].includes(match[1])) metodoPago = match[1];
+      respuestaFinal = respuestaFinal.replace(/\[PAGO: .*?\]/, "").trim();
+    }
+
     if (respuestaFinal.includes("[PEDIDO_FINALIZADO]")) {
       const datosPedido = await extraerPedidoDeHistorial(sesion.id);
       
@@ -211,9 +227,10 @@ Reglas de conversación:
             }
           }
           await tx.pedido.update({ where: { id: nuevoPedido.id }, data: { total: totalPedido } });
-          await tx.pago.create({ data: { pedido_id: nuevoPedido.id, monto: totalPedido, metodo_pago: "efectivo" } });
+          await tx.pago.create({ data: { pedido_id: nuevoPedido.id, monto: totalPedido, metodo_pago: metodoPago } });
         });
-        respuestaFinal = respuestaFinal.replace("[PEDIDO_FINALIZADO]", ` ¡Pedido registrado! Total: S/.${totalPedido}. Tipo: ${tipoPedido === 'delivery' ? 'Delivery' : 'Consumir aquí'}. Pago: efectivo.`).trim();
+        const pagoLabel = { efectivo: 'Efectivo', yape: 'Yape', transferencia: 'Transferencia' }[metodoPago] || 'Efectivo';
+        respuestaFinal = respuestaFinal.replace("[PEDIDO_FINALIZADO]", ` ¡Pedido registrado! Total: S/.${totalPedido}. Tipo: ${tipoPedido === 'delivery' ? 'Delivery' : 'Consumir aquí'}. Pago: ${pagoLabel}.`).trim();
       } else if (datosPedido.items.length > 0 && !sesion.cliente_id) {
         respuestaFinal = respuestaFinal.replace("[PEDIDO_FINALIZADO]", "Por favor dime tu nombre primero para registrar el pedido.").trim();
       } else {
