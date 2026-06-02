@@ -3,7 +3,7 @@ import { api } from '../api';
 
 export default function ChatButton({ session }) {
   const [abierto, setAbierto] = useState(false);
-  const [identificador] = useState(session?.email || 'cliente_anonimo');
+  const [identificador, setIdentificador] = useState(session?.email || 'anon_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
   const [mensaje, setMensaje] = useState('');
   const [chat, setChat] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,6 +17,10 @@ export default function ChatButton({ session }) {
   useEffect(() => { ref.current?.scrollIntoView({ behavior: 'smooth' }); }, [chat, menuMode]);
 
   useEffect(() => {
+    if (!session) {
+      setCargandoHist(false);
+      return;
+    }
     (async () => {
       try {
         const res = await fetch(`http://localhost:3000/api/chat/historial?remitente=${identificador}`).then(r => r.json());
@@ -82,7 +86,16 @@ export default function ChatButton({ session }) {
     <>
       {/* Bubble */}
       <button
-        onClick={() => setAbierto(!abierto)}
+        onClick={() => {
+          if (!abierto && !session) {
+            setChat([]);
+            setCargandoHist(false);
+            setMenuMode(null);
+            setSelectedCat(null);
+            setIdentificador('anon_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
+          }
+          setAbierto(!abierto);
+        }}
         className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-600 text-white rounded-full shadow-lg
                    hover:bg-emerald-700 transition-all flex items-center justify-center text-2xl z-40"
       >
@@ -123,7 +136,13 @@ export default function ChatButton({ session }) {
             {cargandoHist ? (
               <div className="text-center py-8 text-stone-300 text-xs">Cargando...</div>
             ) : chat.length === 0 && !menuMode ? (
-              <div className="text-center py-8 text-stone-300 text-xs">¡Pregúntame sobre el menú!</div>
+              <div className="text-center py-8 text-stone-400 text-xs px-4">
+                {!session || session.rol_nombre === 'Cliente'
+                  ? '¡Pregúntame sobre el menú!'
+                  : session.rol_nombre === 'Empleado'
+                    ? 'Puedo ayudarte con asistencia, pedidos y productos.'
+                    : 'Puedo ayudarte a gestionar el sistema.'}
+              </div>
             ) : (
               chat.map((c, i) => (
                 <div key={i} className={`flex ${c.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -183,7 +202,7 @@ export default function ChatButton({ session }) {
           {/* Quick replies + Input */}
           <div className="border-t border-stone-100 bg-white">
             {/* Quick reply buttons */}
-            {chat.length > 0 && !menuMode && !loading && (
+            {chat.length > 0 && !menuMode && !loading && (!session || session.rol_nombre === 'Cliente') && (
               <div className="flex gap-1.5 px-3 pt-2 pb-1 overflow-x-auto">
                 <button onClick={abrirCategorias}
                   className="shrink-0 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-[10px] font-medium hover:bg-emerald-100 transition-colors flex items-center gap-1">

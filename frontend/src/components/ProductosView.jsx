@@ -14,6 +14,7 @@ export default function ProductosView({ token, session }) {
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [tipo, setTipo] = useState('aqui');
+  const [metodoPago, setMetodoPago] = useState('efectivo');
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
@@ -41,6 +42,7 @@ export default function ProductosView({ token, session }) {
     setNombre('');
     setTelefono('');
     setTipo('aqui');
+    setMetodoPago('efectivo');
     setMensaje('');
   };
 
@@ -51,6 +53,7 @@ export default function ProductosView({ token, session }) {
       nombre: nombre.trim(),
       telefono: telefono.trim() || undefined,
       tipo,
+      metodo_pago: metodoPago,
       items: [{ producto_id: modal.id, cantidad }]
     });
     setEnviando(false);
@@ -197,6 +200,17 @@ export default function ProductosView({ token, session }) {
                     <button key={t} onClick={() => setTipo(t)}
                       className={`flex-1 py-2.5 rounded-lg text-sm border transition-colors ${tipo === t ? 'bg-emerald-600 text-white border-emerald-600' : 'border-stone-200 text-stone-500 hover:border-emerald-300'}`}>
                       {t === 'aqui' ? 'Consumir aquí' : 'Delivery'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-stone-400 block mb-2">Método de pago</label>
+                <div className="flex gap-2">
+                  {['efectivo', 'yape', 'transferencia'].map(m => (
+                    <button key={m} onClick={() => setMetodoPago(m)}
+                      className={`flex-1 py-2.5 rounded-lg text-xs border transition-colors ${metodoPago === m ? 'bg-emerald-600 text-white border-emerald-600' : 'border-stone-200 text-stone-500 hover:border-emerald-300'}`}>
+                      {m === 'efectivo' ? 'Efectivo' : m === 'yape' ? 'Yape' : 'Transferencia'}
                     </button>
                   ))}
                 </div>

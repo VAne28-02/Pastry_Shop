@@ -62,7 +62,7 @@ export default function AsistenciaView({ token, session }) {
     setMensaje('');
     const res = await api.marcarAsistencia(token);
     if (res.success) {
-      setMensaje(res.tipo === 'entrada' ? '✅ Entrada registrada' : '✅ Salida registrada');
+      setMensaje(res.tipo === 'entrada' ? 'Entrada registrada' : 'Salida registrada');
       cargar(fechaFiltro);
     } else {
       setMensaje('❌ ' + (res.error || 'Error'));
@@ -204,12 +204,18 @@ export default function AsistenciaView({ token, session }) {
 
       {/* Filter bar */}
       <div className="bg-white rounded-2xl border border-stone-200 p-4 mb-6 shadow-sm flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-stone-400"><path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 01.628.74v2.288a2.25 2.25 0 01-.659 1.59l-4.682 4.683a2.25 2.25 0 00-.659 1.59v3.237c0 .584-.265 1.135-.732 1.5l-2.5 1.953c-.6.469-1.452.063-1.452-.705v-5.985a2.25 2.25 0 00-.659-1.59L2.66 6.22A2.25 2.25 0 012 4.629V2.34a.75.75 0 01.628-.74z" clipRule="evenodd" /></svg>
+        <div className="relative flex items-center">
+          <input type="date" value={fechaFiltro} id="fechaFiltro"
+            onChange={e => setFechaFiltro(e.target.value)}
+            className="w-0 h-0 p-0 border-0 opacity-0 absolute" />
+          <button onClick={() => document.getElementById('fechaFiltro')?.showPicker?.()}
+            className="flex items-center gap-2 px-3 py-1.5 border border-stone-200 rounded-xl text-sm bg-stone-50 hover:bg-stone-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-stone-400">
+              <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clipRule="evenodd" />
+            </svg>
+            <span className="text-stone-500 text-sm">{fechaFiltro ? new Date(fechaFiltro + 'T00:00:00').toLocaleDateString('es-PE') : 'Filtrar fecha'}</span>
+          </button>
         </div>
-        <input type="date" value={fechaFiltro}
-          onChange={e => setFechaFiltro(e.target.value)}
-          className="px-3 py-1.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
         <button onClick={aplicarFiltro}
           className="px-4 py-1.5 bg-emerald-600 text-white text-xs rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">Filtrar</button>
         {fechaFiltro && (
