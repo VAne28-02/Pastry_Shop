@@ -123,7 +123,7 @@ model Receta {
 model Pedido {
   id             Int      @id @default(autoincrement())
   cliente_id     Int?
-  estado         String   @default("pendiente")
+  estado         String   @default("Pendiente")
   total          Float
   tipo           String   @default("aqui")
   fecha_creacion DateTime @default(now())
@@ -168,6 +168,7 @@ model Promo {
   precio      Float    @default(0)
   icono       String   @default("🎉")
   imagen_url  String?
+  stock       Int      @default(0)
   activa      Boolean  @default(true)
   creado_en   DateTime @default(now())
 }

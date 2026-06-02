@@ -136,83 +136,130 @@ export default function AsistenciaView({ token, session }) {
     return grupos;
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-neutral-400">Cargando...</p></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><p className="text-stone-400">Cargando...</p></div>;
 
   return (
-    <div className={`${esAdmin ? 'max-w-4xl' : 'max-w-2xl'} p-8 mx-auto`}>
+    <div className={`${esAdmin ? 'max-w-5xl' : 'max-w-2xl'} p-8 mx-auto`}>
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-xl font-medium text-neutral-900">Asistencia</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">Registro de entrada y salida</p>
+          <h1 className="text-xl font-medium text-stone-800">Asistencia</h1>
+          <p className="text-sm text-stone-400 mt-0.5">Registro de entrada y salida</p>
         </div>
         {esAdmin && (
           <button onClick={() => setModalAgregar(true)}
-            className="px-4 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors">
-            + Agregar
+            className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
+            Agregar
           </button>
         )}
       </div>
 
-      {/* Tarjeta de hoy (propia) */}
-      <div className="bg-white rounded-xl border border-neutral-100 p-6 mb-6">
-        <p className="text-xs text-neutral-400 mb-4">Mi registro hoy</p>
-        <div className="flex items-center gap-6">
-          <div className="text-center">
-            <p className="text-xs text-neutral-400">Entrada</p>
-            <p className="text-lg font-medium text-neutral-900 mt-1">{hoy ? formatear(hoy.hora_entrada) : '—'}</p>
+      {/* My attendance card */}
+      <div className="bg-white rounded-2xl border border-stone-200 p-6 mb-6 shadow-sm">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-emerald-600">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-stone-800">Mi registro hoy</p>
+              <p className="text-xs text-stone-400">{new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-xs text-neutral-400">Salida</p>
-            <p className="text-lg font-medium text-neutral-900 mt-1">{hoy?.hora_salida ? formatear(hoy.hora_salida) : '—'}</p>
+          <div className={`px-3 py-1 rounded-full text-xs font-medium ${!hoy ? 'bg-stone-100 text-stone-500' : hoy.hora_salida ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+            {!hoy ? 'Sin marcar' : hoy.hora_salida ? 'Completado' : 'En curso'}
           </div>
         </div>
+
+        <div className="flex items-center gap-8 mb-5">
+          <div className="flex-1 bg-stone-50 rounded-xl p-4 text-center">
+            <p className="text-xs text-stone-400 mb-1">Entrada</p>
+            <p className="text-2xl font-light text-stone-800">{hoy ? formatear(hoy.hora_entrada) : '—'}</p>
+          </div>
+          <div className="text-stone-300 text-xl">→</div>
+          <div className="flex-1 bg-stone-50 rounded-xl p-4 text-center">
+            <p className="text-xs text-stone-400 mb-1">Salida</p>
+            <p className="text-2xl font-light text-stone-800">{hoy?.hora_salida ? formatear(hoy.hora_salida) : '—'}</p>
+          </div>
+        </div>
+
         <button onClick={marcar}
-          className="mt-5 px-5 py-2.5 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors">
-          {!hoy ? 'Marcar entrada' : hoy.hora_salida ? 'Ya completaste hoy' : 'Marcar salida'}
+          className={`w-full py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
+            !hoy
+              ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+              : hoy.hora_salida
+                ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                : 'bg-amber-500 text-white hover:bg-amber-600'
+          }`}
+          disabled={hoy?.hora_salida}>
+          {!hoy ? 'Marcar entrada' : hoy.hora_salida ? 'Jornada completada' : 'Marcar salida'}
         </button>
-        {mensaje && <p className="text-sm mt-3">{mensaje}</p>}
+        {mensaje && (
+          <p className={`text-xs text-center mt-3 ${mensaje.includes('✅') ? 'text-emerald-600' : 'text-red-500'}`}>{mensaje}</p>
+        )}
       </div>
 
-      {/* Filtro calendario */}
-      <div className="bg-white rounded-xl border border-neutral-100 p-4 mb-6 flex items-center gap-3 flex-wrap">
-        <p className="text-xs text-neutral-400 uppercase tracking-wider">Filtrar por fecha</p>
+      {/* Filter bar */}
+      <div className="bg-white rounded-2xl border border-stone-200 p-4 mb-6 shadow-sm flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-stone-400"><path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 01.628.74v2.288a2.25 2.25 0 01-.659 1.59l-4.682 4.683a2.25 2.25 0 00-.659 1.59v3.237c0 .584-.265 1.135-.732 1.5l-2.5 1.953c-.6.469-1.452.063-1.452-.705v-5.985a2.25 2.25 0 00-.659-1.59L2.66 6.22A2.25 2.25 0 012 4.629V2.34a.75.75 0 01.628-.74z" clipRule="evenodd" /></svg>
+        </div>
         <input type="date" value={fechaFiltro}
           onChange={e => setFechaFiltro(e.target.value)}
-          className="px-3 py-1.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
-        <button onClick={aplicarFiltro} className="px-4 py-1.5 bg-neutral-900 text-white text-xs rounded-lg hover:bg-neutral-800 transition-colors">Filtrar</button>
-        {fechaFiltro && <button onClick={limpiarFiltro} className="px-3 py-1.5 border border-neutral-200 text-xs rounded-lg hover:bg-neutral-50 transition-colors">Limpiar</button>}
+          className="px-3 py-1.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
+        <button onClick={aplicarFiltro}
+          className="px-4 py-1.5 bg-emerald-600 text-white text-xs rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">Filtrar</button>
+        {fechaFiltro && (
+          <button onClick={limpiarFiltro}
+            className="px-3 py-1.5 border border-stone-200 text-xs rounded-xl hover:bg-stone-50 transition-colors text-stone-500">Limpiar</button>
+        )}
       </div>
 
-      {/* Panel admin: empleados por cargo */}
+      {/* Admin: employees by role */}
       {esAdmin && empleados.length > 0 && (
-        <div className="mb-6">
-          <p className="text-xs text-neutral-400 uppercase tracking-wider mb-4">Empleados — Estado hoy</p>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-stone-400"><path d="M10 1a6 6 0 00-3.318 10.975C7.09 12.15 8 13.162 8 14.5v1a2 2 0 002 2h2a2 2 0 002-2v-1c0-1.338.91-2.35 1.318-2.525A6 6 0 0010 1z" /><circle cx="10" cy="4" r="1.5" /><path d="M6.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /><path d="M10.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /></svg>
+            <p className="text-sm font-medium text-stone-700">Estado del equipo hoy</p>
+          </div>
           {Object.entries(agruparPorCargo(hoyEmpleados)).map(([cargo, lista]) => (
             <div key={cargo} className="mb-4">
-              <p className="text-sm font-medium text-neutral-700 mb-2 capitalize">{cargo}</p>
+              <p className="text-xs text-stone-400 uppercase tracking-wider mb-2 px-1">{cargo}</p>
               <div className="space-y-2">
                 {lista.map(({ empleado, asistencia }) => (
-                  <div key={empleado.id} className="bg-white rounded-lg border border-neutral-100 px-4 py-3 flex items-center justify-between text-sm">
-                    <div>
-                      <span className="font-medium text-neutral-800">{empleado.nombre}</span>
-                      <span className="text-neutral-400 ml-2 text-xs">{empleado.usuario?.email}</span>
+                  <div key={empleado.id}
+                    className="bg-white rounded-xl border border-stone-200 px-5 py-3.5 flex items-center justify-between text-sm shadow-sm hover:border-stone-300 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2.5 h-2.5 rounded-full ${asistencia ? (asistencia.hora_salida ? 'bg-emerald-500' : 'bg-amber-400') : 'bg-stone-200'}`} />
+                      <div>
+                        <span className="font-medium text-stone-800">{empleado.nombre}</span>
+                        <span className="text-stone-400 ml-2 text-xs">{empleado.usuario?.email}</span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
                       {asistencia ? (
                         <>
-                          <span className="text-xs text-neutral-500">Entrada {formatear(asistencia.hora_entrada)}</span>
+                          <div className="text-xs text-stone-500 bg-stone-50 rounded-lg px-3 py-1.5">
+                            <span className="text-stone-400">Entrada </span>
+                            <span className="font-medium text-stone-700">{formatear(asistencia.hora_entrada)}</span>
+                          </div>
                           {asistencia.hora_salida ? (
-                            <span className="text-xs text-green-600">Salida {formatear(asistencia.hora_salida)} ✓</span>
+                            <div className="text-xs bg-emerald-50 text-emerald-600 rounded-lg px-3 py-1.5 font-medium">
+                              Salida {formatear(asistencia.hora_salida)}
+                            </div>
                           ) : (
                             <button onClick={() => adminMarcar(empleado.id)} disabled={marcando === empleado.id}
-                              className="px-3 py-1 bg-neutral-900 text-white text-xs rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+                              className="px-4 py-1.5 bg-emerald-600 text-white text-xs rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
                               {marcando === empleado.id ? '...' : 'Marcar salida'}
                             </button>
                           )}
                         </>
                       ) : (
                         <button onClick={() => adminMarcar(empleado.id)} disabled={marcando === empleado.id}
-                          className="px-3 py-1 bg-neutral-900 text-white text-xs rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+                          className="px-4 py-1.5 bg-emerald-600 text-white text-xs rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
                           {marcando === empleado.id ? '...' : 'Marcar entrada'}
                         </button>
                       )}
@@ -225,76 +272,95 @@ export default function AsistenciaView({ token, session }) {
         </div>
       )}
 
-      {/* Historial */}
-      {historial.length > 0 ? (
-        <div>
-          <p className="text-xs text-neutral-400 mb-3">
-            {fechaFiltro ? `Registros del ${new Date(fechaFiltro).toLocaleDateString('es-PE')}` : 'Últimos registros'}
+      {/* History */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-stone-400"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" /></svg>
+          <p className="text-sm font-medium text-stone-700">
+            {fechaFiltro ? `Registros del ${new Date(fechaFiltro + 'T00:00:00').toLocaleDateString('es-PE')}` : 'Últimos registros'}
           </p>
+        </div>
+        {historial.length > 0 ? (
           <div className="space-y-2">
             {historial.map(h => (
-              <div key={h.id} className="bg-white rounded-lg border border-neutral-100 px-4 py-3 flex items-center justify-between text-sm">
-                <div className="flex items-center gap-3">
-                  {esAdmin && h.empleado && (
-                    <span className="text-xs text-neutral-400 font-medium">{h.empleado.nombre}</span>
-                  )}
-                  <span className="text-neutral-500">{new Date(h.hora_entrada).toLocaleDateString('es-PE')}</span>
-                </div>
+              <div key={h.id}
+                className="bg-white rounded-xl border border-stone-200 px-5 py-3.5 flex items-center justify-between text-sm shadow-sm hover:border-stone-300 transition-colors">
                 <div className="flex items-center gap-4">
-                  <span className="text-neutral-700">Entrada {formatear(h.hora_entrada)}</span>
-                  <span className="text-neutral-400">→</span>
-                  <span className="text-neutral-700">{h.hora_salida ? `Salida ${formatear(h.hora_salida)}` : '—'}</span>
-                  {esAdmin && (
-                    <button onClick={() => abrirEditar(h)}
-                      className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100">✎</button>
+                  {esAdmin && h.empleado && (
+                    <span className="text-xs font-medium text-stone-600 bg-stone-50 rounded-lg px-2.5 py-1">{h.empleado.nombre}</span>
                   )}
+                  <span className="text-stone-400 text-xs">{new Date(h.hora_entrada).toLocaleDateString('es-PE')}</span>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="bg-emerald-50 text-emerald-600 rounded-lg px-2.5 py-1 font-medium">
+                      {formatear(h.hora_entrada)}
+                    </span>
+                    <span className="text-stone-300">→</span>
+                    <span className={`rounded-lg px-2.5 py-1 font-medium ${h.hora_salida ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-400'}`}>
+                      {h.hora_salida ? formatear(h.hora_salida) : '—'}
+                    </span>
+                  </div>
                 </div>
+                {esAdmin && (
+                  <button onClick={() => abrirEditar(h)}
+                    className="text-xs px-2.5 py-1.5 bg-white text-blue-600 rounded-lg border border-stone-200 hover:bg-blue-50 transition-colors flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path d="M2.695 5.763A1.75 1.75 0 003.5 6.756V14.5A2.5 2.5 0 006 17h8a2.5 2.5 0 002.5-2.5V6.756a1.75 1.75 0 00.805-.993l.402-1.31A.75.75 0 0017 3.5H3a.75.75 0 00-.707.953l.402 1.31zM6 7.75a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5zm4.25 0a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5zm4.25 0a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5z" /></svg>
+                    Editar
+                  </button>
+                )}
               </div>
             ))}
           </div>
-        </div>
-      ) : (
-        <p className="text-sm text-neutral-400 text-center py-8">No hay registros{fechaFiltro ? ' en esta fecha' : ''}.</p>
-      )}
+        ) : (
+          <div className="text-center py-12">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8 text-stone-200 mx-auto mb-2"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" /></svg>
+            <p className="text-sm text-stone-300">No hay registros{fechaFiltro ? ' en esta fecha' : ''}.</p>
+          </div>
+        )}
+      </div>
 
       {/* Modal Agregar Asistencia */}
       {modalAgregar && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setModalAgregar(false)}>
-          <div className="bg-white rounded-xl p-6 w-96 shadow-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-medium text-neutral-700 mb-4">Agregar Asistencia</h3>
+          <div className="bg-white rounded-2xl p-6 w-96 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-medium text-stone-800">Agregar Asistencia</h3>
+              <button onClick={() => setModalAgregar(false)} className="text-stone-300 hover:text-stone-500 text-lg leading-none">&times;</button>
+            </div>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Empleado</label>
+                <label className="block text-xs text-stone-500 mb-1.5 font-medium">Empleado</label>
                 <select value={formAsis.empleado_id} onChange={e => setFormAsis({...formAsis, empleado_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300 bg-white">
+                  className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white">
                   <option value="">Seleccionar</option>
                   {empleados.map(e => <option key={e.id} value={e.id}>{e.nombre} ({e.cargo})</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Fecha</label>
+                <label className="block text-xs text-stone-500 mb-1.5 font-medium">Fecha</label>
                 <input type="date" value={formAsis.fecha}
                   onChange={e => setFormAsis({...formAsis, fecha: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                  className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Entrada</label>
+                  <label className="block text-xs text-stone-500 mb-1.5 font-medium">Entrada</label>
                   <input type="time" value={formAsis.hora_entrada}
                     onChange={e => setFormAsis({...formAsis, hora_entrada: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                    className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Salida (opcional)</label>
+                  <label className="block text-xs text-stone-500 mb-1.5 font-medium">Salida (opcional)</label>
                   <input type="time" value={formAsis.hora_salida}
                     onChange={e => setFormAsis({...formAsis, hora_salida: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                    className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
                 </div>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
-              <button onClick={guardarAgregar} className="flex-1 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors">Guardar</button>
-              <button onClick={() => setModalAgregar(false)} className="py-2 px-4 border border-neutral-200 text-sm rounded-lg hover:bg-neutral-50 transition-colors">Cancelar</button>
+            <div className="flex gap-2 mt-5">
+              <button onClick={guardarAgregar}
+                className="flex-1 py-2.5 bg-emerald-600 text-white text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm font-medium">Guardar</button>
+              <button onClick={() => setModalAgregar(false)}
+                className="py-2.5 px-5 border border-stone-200 text-sm rounded-xl hover:bg-stone-50 transition-colors text-stone-500">Cancelar</button>
             </div>
           </div>
         </div>
@@ -303,30 +369,37 @@ export default function AsistenciaView({ token, session }) {
       {/* Modal Editar Asistencia */}
       {modalEditar && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setModalEditar(null)}>
-          <div className="bg-white rounded-xl p-6 w-96 shadow-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-medium text-neutral-700 mb-4">Editar Asistencia</h3>
-            <p className="text-xs text-neutral-400 mb-3">
-              {modalEditar.empleado?.nombre || ''} — {new Date(modalEditar.hora_entrada).toLocaleDateString('es-PE')}
-            </p>
+          <div className="bg-white rounded-2xl p-6 w-96 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-sm font-medium text-stone-800">Editar Asistencia</h3>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  {modalEditar.empleado?.nombre || ''} — {new Date(modalEditar.hora_entrada).toLocaleDateString('es-PE')}
+                </p>
+              </div>
+              <button onClick={() => setModalEditar(null)} className="text-stone-300 hover:text-stone-500 text-lg leading-none">&times;</button>
+            </div>
             <div className="space-y-3">
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Entrada</label>
+                  <label className="block text-xs text-stone-500 mb-1.5 font-medium">Entrada</label>
                   <input type="time" value={formAsis.hora_entrada}
                     onChange={e => setFormAsis({...formAsis, hora_entrada: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                    className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-neutral-500 mb-1">Salida</label>
+                  <label className="block text-xs text-stone-500 mb-1.5 font-medium">Salida</label>
                   <input type="time" value={formAsis.hora_salida}
                     onChange={e => setFormAsis({...formAsis, hora_salida: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300" />
+                    className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-stone-50" />
                 </div>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
-              <button onClick={guardarEditar} className="flex-1 py-2 bg-neutral-900 text-white text-sm rounded-lg hover:bg-neutral-800 transition-colors">Guardar</button>
-              <button onClick={() => setModalEditar(null)} className="py-2 px-4 border border-neutral-200 text-sm rounded-lg hover:bg-neutral-50 transition-colors">Cancelar</button>
+            <div className="flex gap-2 mt-5">
+              <button onClick={guardarEditar}
+                className="flex-1 py-2.5 bg-emerald-600 text-white text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm font-medium">Guardar</button>
+              <button onClick={() => setModalEditar(null)}
+                className="py-2.5 px-5 border border-stone-200 text-sm rounded-xl hover:bg-stone-50 transition-colors text-stone-500">Cancelar</button>
             </div>
           </div>
         </div>

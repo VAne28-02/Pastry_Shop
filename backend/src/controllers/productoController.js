@@ -29,11 +29,11 @@ const obtenerProducto = async (req, res) => {
 };
 
 const crearProducto = async (req, res) => {
-  const { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible } = req.body;
+  const { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible, stock } = req.body;
   if (!nombre || !precio_base || !categoria_id) return res.status(400).json({ error: "'nombre', 'precio_base' y 'categoria_id' son requeridos." });
   try {
     const producto = await prisma.producto.create({
-      data: { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible }
+      data: { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible, stock: parseInt(stock) || 0 }
     });
     res.status(201).json(producto);
   } catch (error) {
@@ -43,14 +43,19 @@ const crearProducto = async (req, res) => {
 
 const actualizarProducto = async (req, res) => {
   const { id } = req.params;
-  const { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible } = req.body;
+  const { nombre, descripcion, precio_base, categoria_id, imagen_url, disponible, stock } = req.body;
   try {
     const idProducto = parseInt(id);
     if (isNaN(idProducto)) return res.status(400).json({ error: "ID inválido." });
-    const producto = await prisma.producto.update({
-      where: { id: idProducto },
-      data: { ...(nombre && { nombre }), ...(descripcion !== undefined && { descripcion }), ...(precio_base && { precio_base }), ...(categoria_id && { categoria_id }), ...(imagen_url !== undefined && { imagen_url }), ...(disponible !== undefined && { disponible }) }
-    });
+    const data = {};
+    if (nombre) data.nombre = nombre;
+    if (descripcion !== undefined) data.descripcion = descripcion;
+    if (precio_base) data.precio_base = precio_base;
+    if (categoria_id) data.categoria_id = categoria_id;
+    if (imagen_url !== undefined) data.imagen_url = imagen_url;
+    if (disponible !== undefined) data.disponible = disponible;
+    if (stock !== undefined) data.stock = parseInt(stock);
+    const producto = await prisma.producto.update({ where: { id: idProducto }, data });
     res.json(producto);
   } catch (error) {
     if (error.code === 'P2025') return res.status(404).json({ error: "Producto no encontrado." });

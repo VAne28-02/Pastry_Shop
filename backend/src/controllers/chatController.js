@@ -37,7 +37,7 @@ const actualizarEstadoPedido = async (req, res) => {
 
   if (!nuevoEstado) return res.status(400).json({ success: false, error: "El campo 'nuevoEstado' es requerido." });
 
-  const estadosValidos = ['pendiente', 'PREPARANDO', 'LISTO', 'entregado', 'cancelado'];
+  const estadosValidos = ['Pendiente', 'Preparando', 'Listo', 'Entregado', 'Cancelado'];
   if (!estadosValidos.includes(nuevoEstado)) {
     return res.status(400).json({ success: false, error: `Estado inválido. Válidos: ${estadosValidos.join(', ')}` });
   }

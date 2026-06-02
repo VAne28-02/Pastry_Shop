@@ -48,14 +48,17 @@ const actualizarStock = async (req, res) => {
 
 const actualizarIngrediente = async (req, res) => {
   const { id } = req.params;
-  const { nombre, unidad_medida, costo_por_unidad, stock_minimo } = req.body;
+  const { nombre, unidad_medida, costo_por_unidad, stock_actual, stock_minimo } = req.body;
   try {
     const idIng = parseInt(id);
     if (isNaN(idIng)) return res.status(400).json({ error: "ID inválido." });
-    const actualizado = await prisma.ingrediente.update({
-      where: { id: idIng },
-      data: { ...(nombre && { nombre }), ...(unidad_medida && { unidad_medida }), ...(costo_por_unidad !== undefined && { costo_por_unidad }), ...(stock_minimo !== undefined && { stock_minimo }) }
-    });
+    const data = {};
+    if (nombre !== undefined && nombre) data.nombre = nombre;
+    if (unidad_medida !== undefined && unidad_medida) data.unidad_medida = unidad_medida;
+    if (costo_por_unidad !== undefined) data.costo_por_unidad = costo_por_unidad;
+    if (stock_actual !== undefined) data.stock_actual = stock_actual;
+    if (stock_minimo !== undefined) data.stock_minimo = stock_minimo;
+    const actualizado = await prisma.ingrediente.update({ where: { id: idIng }, data });
     res.json(actualizado);
   } catch (error) {
     if (error.code === 'P2025') return res.status(404).json({ error: "Ingrediente no encontrado." });

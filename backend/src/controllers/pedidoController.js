@@ -31,6 +31,13 @@ const crearPedido = async (req, res) => {
 
       await tx.detallePedido.createMany({ data: detallesData });
 
+      for (const p of productos) {
+        await tx.producto.update({
+          where: { id: p.producto_id },
+          data: { stock: { increment: p.cantidad } }
+        });
+      }
+
       await tx.pago.create({
         data: {
           pedido_id: nuevoPedido.id,
@@ -73,6 +80,10 @@ const registrarPedidoDirecto = async (req, res) => {
           producto_id: prod.id,
           cantidad: item.cantidad,
           subtotal
+        });
+        await tx.producto.update({
+          where: { id: prod.id },
+          data: { stock: { increment: item.cantidad } }
         });
       }
 
@@ -132,7 +143,7 @@ const limpiarPedidosPorFecha = async (req, res) => {
 };
 
 const registrarPedidoPromo = async (req, res) => {
-  const { nombre, telefono, tipo, promoTitulo } = req.body;
+  const { nombre, telefono, tipo, promoId } = req.body;
   if (!nombre) return res.status(400).json({ error: "'nombre' es requerido." });
 
   try {
@@ -144,6 +155,13 @@ const registrarPedidoPromo = async (req, res) => {
             create: { telefono, nombre }
           })
         : await tx.cliente.create({ data: { nombre } });
+
+      if (promoId) {
+        await tx.promo.update({
+          where: { id: parseInt(promoId) },
+          data: { stock: { increment: 1 } }
+        });
+      }
 
       const pedido = await tx.pedido.create({
         data: {
