@@ -17,6 +17,7 @@ const gananciaRoutes = require('./routes/gananciaRoutes');
 const ingredienteRoutes = require('./routes/ingredienteRoutes');
 const empleadoRoutes = require('./routes/empleadoRoutes');
 const promoRoutes = require('./routes/promoRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +36,7 @@ app.use('/api/ganancia', gananciaRoutes);
 app.use('/api/ingredientes', ingredienteRoutes);
 app.use('/api/empleados', empleadoRoutes);
 app.use('/api/promos', promoRoutes);
+app.use('/api/factura', invoiceRoutes);
 
 // ... resto de tu código igual ...
 

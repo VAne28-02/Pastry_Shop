@@ -171,7 +171,8 @@ Reglas de conversación:
 - Pregunta al cliente si es para "aqui" o "delivery" y captúralo con [TIPO: aqui] o [TIPO: delivery].
 - Pregunta al cliente qué método de pago prefiere (efectivo, yape, transferencia) y captúralo con [PAGO: metodo].
 - No inventes productos, solo usa los del menú.
-- Si preguntan por funciones del sistema, explica según los roles.`;
+- Si preguntan por funciones del sistema, explica según los roles.
+- Cuando el usuario pregunte por un producto o categoría específica (ej: "pasteles con fresa", "bebidas", "sandwiches"), responde con información sobre eso y agrega [BUSCAR: término] para mostrar los resultados en la página (ej: [BUSCAR: pastel], [BUSCAR: fresa], [BUSCAR: bebidas]).`;
 
     const historialMensajes = await prisma.mensajeChat.findMany({ where: { sesion_id: sesion.id }, orderBy: { fecha_hora: 'asc' }, take: 10 });
     const mensajesParaIA = [{ role: 'system', content: systemPrompt }, ...historialMensajes.map(m => ({ role: m.emisor === 'bot' ? 'assistant' : 'user', content: m.contenido_mensaje })), { role: 'user', content: mensajeUsuario }];
