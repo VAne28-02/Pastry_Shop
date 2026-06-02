@@ -26,9 +26,9 @@ const mapas = {
     if (promo) {
       const url = archivo ? '/promos/' + encodeURI(archivo) : null;
       await prisma.promo.update({ where: { id: promo.id }, data: { imagen_url: url } });
-      console.log('✓', promo.titulo, '->', url || '(sin imagen)');
+      console.log('', promo.titulo, '->', url || '(sin imagen)');
     } else {
-      console.log('✗ No encontrado:', titulo);
+      console.log(' No encontrado:', titulo);
     }
   }
   await prisma.$disconnect();
