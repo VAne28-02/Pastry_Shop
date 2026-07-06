@@ -6,8 +6,9 @@ export const PedidoCard = ({ pedido, onUpdate }) => (
         <div className="flex gap-2">
             <button onClick={() => onUpdate(pedido.id, 'PREPARANDO')} 
                     className="bg-slate-900 text-white py-2 px-4 rounded-lg text-sm">
-                Preparar
+                Preparacion
             </button>
         </div>
     </div>
+
 );
